@@ -1,3 +1,4 @@
+import { Interactions } from 'src/interactions/interactions.entity';
 import {
   BaseEntity,
   Entity,
@@ -5,6 +6,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -44,4 +46,7 @@ export class People extends BaseEntity {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
+
+  @OneToMany(() => Interactions, (interaction) => interaction.person)
+  Interactions: Interactions[];
 }
