@@ -44,9 +44,11 @@ export class AuthService {
     }
   }
 
-  async signin(
-    authCredentailsDto: AuthCredentailsDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async signin(authCredentailsDto: AuthCredentailsDto): Promise<{
+    user: Partial<User>;
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const { username, password } = authCredentailsDto;
 
     const user = await this.userRepository.findOne({ where: { username } });
@@ -68,7 +70,11 @@ export class AuthService {
     user.refreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userRepository.save(user);
 
-    return { accessToken, refreshToken };
+    // Don’t expose password or hashed refresh token
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, refreshToken: __, ...safeUser } = user;
+
+    return { user: safeUser, accessToken, refreshToken };
   }
 
   async refresh(
