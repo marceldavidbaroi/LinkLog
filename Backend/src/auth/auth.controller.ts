@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './get-user.decorator';
 import { User } from './user.entity';
+import { SigninDto } from './dto/sign-in.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,7 +17,7 @@ export class AuthController {
 
   @Post('/signin')
   signIn(
-    @Body() authCredentailsDto: AuthCredentailsDto,
+    @Body() authCredentailsDto: SigninDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     return this.authService.signin(authCredentailsDto);
   }

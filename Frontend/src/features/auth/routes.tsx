@@ -1,10 +1,11 @@
 // features/auth/routes.tsx
-import type { RouteObject } from "react-router-dom";
 import LoginPage from "./pages/LoginIndex";
+import AuthLayout from "../../layouts/AuthLayout";
+import type { AppRouteObject } from "../../types/route.type";
 // import SignupPage from "./pages/SignupPage";
 
-export const authRoutes: RouteObject[] = [
-  { path: "/login", element: <LoginPage /> },
+export const authRoutes: AppRouteObject[] = [
+  { path: "/login", element: <LoginPage />, layout: AuthLayout },
   //   { path: "/logout", element: <LoginPage /> },
   //   { path: "/signup", element: <SignupPage /> },
 ];

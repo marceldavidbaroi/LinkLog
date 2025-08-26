@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './user.entity';
 import { AuthCredentailsDto } from './dto/auth-credentials.dto';
+import { SigninDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +45,7 @@ export class AuthService {
     }
   }
 
-  async signin(authCredentailsDto: AuthCredentailsDto): Promise<{
+  async signin(authCredentailsDto: SigninDto): Promise<{
     user: Partial<User>;
     accessToken: string;
     refreshToken: string;
