@@ -1,5 +1,5 @@
 // features/auth/pages/LoginPage.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -38,10 +38,12 @@ export default function LoginPage() {
     if (Object.keys(newErrors).length > 0) return;
 
     await login({ username, password });
+  };
+  useEffect(() => {
     if (token) {
       navigate("/dashboard");
     }
-  };
+  }, [token, navigate]);
 
   return (
     <Card className="w-96 rounded-xl shadow-md">

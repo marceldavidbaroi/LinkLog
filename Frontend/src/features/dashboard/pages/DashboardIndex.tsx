@@ -7,14 +7,19 @@ import {
   Paper,
 } from "@mui/material";
 import ThemeSelector from "../../../components/ThemeSelector";
+import useAuthStore from "../../auth/store/authStore";
 
 export default function DashboardIndex() {
+  const user = useAuthStore((state) => state.user);
+  console.log(user);
+
   return (
     <Box
       component={Paper}
       elevation={3}
-      className="min-h-screen p-6 bg-[var(--background)] text-[var(--text)]"
+      className=" min-h-screen p-6 bg-[var(--background)] text-[var(--text)]"
     >
+      {user?.username}
       {/* Header */}
       <Box
         display="flex"
