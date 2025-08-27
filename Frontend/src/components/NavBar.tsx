@@ -1,9 +1,9 @@
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { Link } from "react-router-dom";
-import useAuthStore from "../stores/authStore";
+import useAuthStore from "../features/auth/store/authStore";
 
 export default function NavBar() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
 
   return (
     <AppBar position="static">
@@ -18,9 +18,9 @@ export default function NavBar() {
               <Button color="inherit" component={Link} to="/dashboard">
                 Dashboard
               </Button>
-              <Button color="inherit" onClick={logout}>
+              {/* <Button color="inherit" onClick={logout}>
                 Logout
-              </Button>
+              </Button> */}
             </>
           ) : (
             <Button color="inherit" component={Link} to="/login">
