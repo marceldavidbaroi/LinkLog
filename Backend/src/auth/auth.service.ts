@@ -3,6 +3,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,16 +12,21 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from './user.entity';
 import { AuthCredentailsDto } from './dto/auth-credentials.dto';
 import { SigninDto } from './dto/sign-in.dto';
+import { UserPreferences } from './userPreferences.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserPreferences)
+    private preferencesRepository: Repository<UserPreferences>,
     private jwtService: JwtService,
   ) {}
 
-  async signup(authCredentailsDto: AuthCredentailsDto): Promise<void> {
+  async signup(
+    authCredentailsDto: AuthCredentailsDto,
+  ): Promise<{ message: string }> {
     const { username, password } = authCredentailsDto;
 
     const existingUser = await this.userRepository.findOne({
@@ -40,6 +46,16 @@ export class AuthService {
 
     try {
       await this.userRepository.save(user);
+
+      // Create default preferences
+      const preferences = this.preferencesRepository.create({
+        user,
+        frontend: {},
+        backend: {},
+      });
+      await this.preferencesRepository.save(preferences);
+
+      return { message: 'Signup successful' };
     } catch {
       throw new InternalServerErrorException('Error creating user');
     }
@@ -113,5 +129,63 @@ export class AuthService {
 
     // Save the updated user
     await this.userRepository.save(user);
+  }
+  async getProfile(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['preferences'],
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, refreshToken, ...safeUser } = user;
+
+    return {
+      ...safeUser,
+      preferences: user.preferences || { frontend: {}, backend: {} },
+    };
+  }
+
+  async updateProfile(userId: number, updateData: Partial<User>) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    Object.assign(user, updateData);
+    await this.userRepository.save(user);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, refreshToken, ...safeUser } = user;
+    return safeUser;
+  }
+
+  async updatePreferences(
+    userId: number,
+    updateData: { frontend?: any; backend?: any },
+  ) {
+    let prefs = await this.preferencesRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!prefs) {
+      // Create if not exist
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) throw new NotFoundException('User not found');
+
+      prefs = this.preferencesRepository.create({
+        user,
+        frontend: {},
+        backend: {},
+      });
+    }
+
+    // Merge updates without overwriting other fields
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    prefs.frontend = { ...prefs.frontend, ...updateData.frontend };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    prefs.backend = { ...prefs.backend, ...updateData.backend };
+
+    await this.preferencesRepository.save(prefs);
+
+    return prefs;
   }
 }

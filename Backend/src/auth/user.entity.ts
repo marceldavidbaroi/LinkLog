@@ -1,18 +1,20 @@
-import { Interactions } from 'src/interactions/interactions.entity';
 import {
   BaseEntity,
   Column,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Interactions } from 'src/interactions/interactions.entity';
+import { UserPreferences } from './userPreferences.entity';
 
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true }) // optional email
+  @Column({ unique: true, nullable: true })
   email?: string;
 
   @Column({ unique: true, nullable: true })
@@ -25,7 +27,7 @@ export class User extends BaseEntity {
   created_at: Date;
 
   @Column({ nullable: true })
-  refreshToken?: string; // hashed refresh token
+  refreshToken?: string;
 
   @Column({
     type: 'timestamp',
@@ -36,4 +38,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Interactions, (interaction) => interaction.user)
   interactions: Interactions[];
+
+  @OneToOne(() => UserPreferences, (pref) => pref.user, { cascade: true })
+  preferences: UserPreferences;
 }
