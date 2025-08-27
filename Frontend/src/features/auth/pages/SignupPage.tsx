@@ -1,8 +1,5 @@
-// features/auth/pages/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-
 import {
   Box,
   TextField,
@@ -12,34 +9,48 @@ import {
   CardContent,
   InputAdornment,
 } from "@mui/material";
-import { Person, Lock, Login as LoginIcon } from "@mui/icons-material";
+import { Person, Lock } from "@mui/icons-material";
+import { CircularProgress } from "@mui/material";
 
-export default function LoginPage() {
+import { useAuth } from "../hooks/useAuth";
+
+export default function SignupPage() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("1234@asdfF");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{
     username?: string;
     password?: string;
+    confirmPassword?: string;
   }>({});
-  const { login, loading, error, token } = useAuth();
   const navigate = useNavigate();
+  const { signup, error, loading } = useAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Reset errors
-    const newErrors: { username?: string; password?: string } = {};
+    const newErrors: {
+      username?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+
     if (!username.trim()) newErrors.username = "Username is required";
     if (!password.trim()) newErrors.password = "Password is required";
+    if (!confirmPassword.trim())
+      newErrors.confirmPassword = "Confirm Password is required";
+    if (password && confirmPassword && password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
 
     setErrors(newErrors);
 
-    // If any error, stop submission
     if (Object.keys(newErrors).length > 0) return;
 
-    await login({ username, password });
-    if (token) {
-      navigate("/dashboard");
+    // TODO: call your signup API
+    await signup({ username, password });
+    if (!error) {
+      navigate("/auth/login");
     }
   };
 
@@ -52,9 +63,8 @@ export default function LoginPage() {
           component="h2"
           className="text-center font-semibold mb-6 text-gray-800"
         >
-          Login
+          Sign Up
         </Typography>
-
         {/* Server Error */}
         {error && (
           <Typography color="error" className="text-center text-sm mb-4">
@@ -65,7 +75,7 @@ export default function LoginPage() {
         {/* Form */}
         <Box
           component="form"
-          onSubmit={handleLogin}
+          onSubmit={handleSignup}
           noValidate
           autoComplete="off"
           className="flex flex-col gap-5"
@@ -107,17 +117,40 @@ export default function LoginPage() {
             }}
           />
 
+          {/* Confirm Password */}
+          <TextField
+            label="Confirm Password"
+            type="password"
+            variant="outlined"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock fontSize="small" className="text-gray-500" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
           {/* Button */}
+
           <Button
             type="submit"
             variant="contained"
             color="primary"
             disabled={loading}
-            startIcon={<LoginIcon />}
-            className="!mt-2 rounded-md font-medium"
+            className="!mt-2 rounded-md font-medium flex justify-center items-center"
             fullWidth
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? (
+              <CircularProgress size={20} className="text-white" />
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </Box>
       </CardContent>

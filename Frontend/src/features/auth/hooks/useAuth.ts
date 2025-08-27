@@ -22,8 +22,9 @@ export const useAuth = () => {
     setError(null);
     try {
       const data: LoginResponse = await loginUser(payload);
+      console.log(data);
       setUser(data.user);
-      setToken(data.token);
+      setToken(data.accessToken);
       setRefreshToken(data.refreshToken);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
