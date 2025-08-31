@@ -5,7 +5,7 @@ export const loginUser = async (payload: {
   username: string;
   password: string;
 }): Promise<LoginResponse> => {
-  const { data } = await api.post<LoginResponse>("/auth/signin", payload);
+  const data = await api.post("/auth/signin", payload);
   return data;
 };
 
@@ -13,6 +13,6 @@ export const signupUser = async (payload: {
   username: string;
   password: string;
 }): Promise<SignupResponse> => {
-  const { data } = await api.post<SignupResponse>("/auth/signup", payload);
+  const data = await api.post("/auth/signup", payload);
   return data;
 };

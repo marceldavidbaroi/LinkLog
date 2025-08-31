@@ -18,6 +18,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { Link } from "react-router-dom";
 import useAuthStore from "../features/auth/store/authStore";
+import ThemeSelector from "./ThemeSelector";
 
 export default function NavBar() {
   const { user } = useAuthStore();
@@ -37,30 +38,53 @@ export default function NavBar() {
   };
 
   const drawer = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer}>
+    <Box sx={{ width: 250 }} role="presentation">
       <List>
-        <ListItem button component={Link} to="/">
+        <ListItem button component={Link} to="/" onClick={toggleDrawer}>
           <ListItemText primary="Home" />
         </ListItem>
-        <ListItem button component={Link} to="/diary">
+        <ListItem button component={Link} to="/diary" onClick={toggleDrawer}>
           <ListItemText primary="Diary" />
         </ListItem>
         {user && (
           <>
             <Divider />
-            <ListItem button component={Link} to="/profile">
+            <ListItem
+              button
+              component={Link}
+              to="/profile"
+              onClick={toggleDrawer}
+            >
               <ListItemText primary="Profile" />
             </ListItem>
-            <ListItem button component={Link} to="/contact">
+            <ListItem
+              button
+              component={Link}
+              to="/contact"
+              onClick={toggleDrawer}
+            >
               <ListItemText primary="Contact" />
             </ListItem>
-            <ListItem button component={Link} to="/logout">
+            <ListItem
+              button
+              component={Link}
+              to="/logout"
+              onClick={toggleDrawer}
+            >
               <ListItemText primary="Logout" />
+            </ListItem>
+            <ListItem>
+              <ThemeSelector mobile /> {/* collapsible theme selector */}
             </ListItem>
           </>
         )}
         {!user && (
-          <ListItem button component={Link} to="/login">
+          <ListItem
+            button
+            component={Link}
+            to="/auth/login"
+            onClick={toggleDrawer}
+          >
             <ListItemText primary="Login" />
           </ListItem>
         )}
@@ -129,10 +153,13 @@ export default function NavBar() {
                   <MenuItem component={Link} to="/logout" onClick={handleClose}>
                     Logout
                   </MenuItem>
+                  <MenuItem>
+                    <ThemeSelector />
+                  </MenuItem>
                 </Menu>
               </>
             ) : (
-              <Button color="inherit" component={Link} to="/login">
+              <Button color="inherit" component={Link} to="/auth/login">
                 Login
               </Button>
             )}

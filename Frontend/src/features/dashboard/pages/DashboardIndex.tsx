@@ -32,7 +32,6 @@ export default function DashboardIndex() {
         </Typography>
 
         {/* Theme selector */}
-        <ThemeSelector />
       </Box>
 
       {/* Stats cards */}
