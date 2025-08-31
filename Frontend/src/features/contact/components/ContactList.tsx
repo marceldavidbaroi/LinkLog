@@ -31,7 +31,7 @@ interface ContactListProps {
   contactList: Person[];
   onAddContact?: () => void;
   onEditSubmit?: (updatedPerson: Person) => void;
-  onDelete?: (person: Person) => void;
+  onDelete?: (id: number) => void;
 }
 
 const ContactList = ({
@@ -209,7 +209,9 @@ const ContactList = ({
                     </Tooltip>
                     {onDelete && (
                       <Tooltip title="Delete">
-                        <IconButton onClick={() => onDelete(selectedPerson)}>
+                        <IconButton
+                          onClick={() => onDelete(selectedPerson?.id)}
+                        >
                           <DeleteIcon
                             sx={{ color: theme.palette.error.main }}
                           />
