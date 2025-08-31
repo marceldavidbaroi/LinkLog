@@ -6,7 +6,7 @@ import {
   Autocomplete,
   TextField,
 } from "@mui/material";
-import AddPersonDialog from "../../contact/components/AddPersonDialog";
+import AddPersonDialog from "../../contact/components/AddContactDialog";
 
 interface Person {
   id: number;

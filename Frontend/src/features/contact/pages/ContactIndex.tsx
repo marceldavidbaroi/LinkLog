@@ -1,53 +1,75 @@
 import { useEffect, useState } from "react";
 import { useContact } from "../hooks/contactAuth";
 import useContactStore from "../store/contactStore";
-import { Box, Paper } from "@mui/material";
-import ThemeSelector from "../../../components/ThemeSelector";
-import AddPersonDialog from "../components/AddPersonDialog";
+import { Box, Paper, Snackbar, Alert } from "@mui/material";
+import AddContactDialog from "../components/AddContactDialog";
 import ContactList from "../components/ContactList";
+import type { Person } from "../types/contact.type";
 
 const ContactIndex = () => {
-  const { getAll } = useContact();
+  const { getAll, create, update } = useContact();
   const contactStore = useContactStore();
-  const [contacts, setContacts] = useState([]);
-  const getAllContacts = async () => {
-    await getAll();
-  };
+  const [open, setOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    const response = getAllContacts();
-    console.log("test for the store ", contactStore.contactList);
+    getAll(); // fetch all contacts on mount
   }, []);
 
-  const [open, setOpen] = useState(false);
+  // Show snackbar whenever store.error changes
+  useEffect(() => {
+    console.log("Error changed:", contactStore.error);
+    if (contactStore.error) setSnackbarOpen(true);
+  }, [contactStore.error]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleSave = (personName: string, notes: string) => {
-    console.log("Saved person:", personName, notes);
-    // Add to your store or call API here
+  const handleSave = async (data: Partial<Person>) => {
+    await create(data); // errors handled inside the hook/store
+  };
+
+  const updateContact = async (data: Partial<Person>) => {
+    if (!data.id) return;
+
+    const payload: Partial<Person> = {
+      email: data.email ?? "",
+      emergency_contact: data.emergency_contact ?? "",
+      first_name: data.first_name ?? "",
+      last_name: data.last_name ?? "",
+      notes: data.notes ?? "",
+      phone: data.phone ?? "",
+    };
+
+    await update(data.id, payload); // errors handled in hook/store
   };
 
   return (
-    <>
-      <Box component={Paper} elevation={0} className=" min-h-screen p-6 ">
-        <ContactList
-          contactList={contactStore.contactList}
-          onAddContact={() => {
-            console.log("Add contact clicked!");
-          }}
-          onEditSubmit={(updated) => console.log("Updated contact", updated)}
-          onDelete={(person) => console.log("Delete contact", person)}
-        />
-        <button onClick={handleOpen}>Add Person</button>
-        <AddPersonDialog
-          open={open}
-          onClose={handleClose}
-          onSave={handleSave}
-        />
-      </Box>
-    </>
+    <Box component={Paper} elevation={0} className="min-h-screen p-6">
+      <ContactList
+        contactList={contactStore.contactList}
+        onAddContact={handleOpen}
+        onEditSubmit={updateContact}
+        onDelete={(person) => console.log("Delete contact", person)}
+      />
+
+      <AddContactDialog open={open} onClose={handleClose} onSave={handleSave} />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {contactStore.error}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

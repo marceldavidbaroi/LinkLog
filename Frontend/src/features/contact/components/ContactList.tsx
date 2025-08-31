@@ -77,9 +77,10 @@ const ContactList = ({
 
   const submitEdit = () => {
     if (selectedPerson && onEditSubmit) {
-      onEditSubmit(editForm as Person);
+      const updatedPerson = { ...editForm, id: selectedPerson.id } as Person;
+      onEditSubmit(updatedPerson); // send updated data with ID
       setEditing(false);
-      setSelectedPerson(editForm as Person); // update locally
+      setSelectedPerson(updatedPerson); // update locally
     }
   };
 

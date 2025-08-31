@@ -21,7 +21,7 @@ const update = async (payload: {
   id: number;
   payload: Partial<Person>;
 }): Promise<ApiResponse<Person>> => {
-  return await api.put(`/people/${payload.id}`, payload.payload);
+  return await api.patch(`/people/${payload.id}`, payload.payload);
 };
 
 const remove = async (id: number): Promise<ApiResponse<null>> => {
