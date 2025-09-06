@@ -6,6 +6,7 @@ export type ThemeConfig = {
     accent: string;
     background: string;
     surface: string;
+    sidebarBackground: string; // added complementary color for sidebars
     text: string;
     textSecondary?: string;
     error: string;
@@ -26,6 +27,7 @@ export const themes: ThemeConfig[] = [
       accent: "#F59E0B",
       background: "#F3F4F6",
       surface: "#FFFFFF",
+      sidebarBackground: "#E5E7EB", // slightly darker than background
       text: "#111827",
       textSecondary: "#6B7280",
       error: "#B91C1C",
@@ -44,6 +46,7 @@ export const themes: ThemeConfig[] = [
       accent: "#F2C94C",
       background: "#0D1117",
       surface: "#1B1F2B",
+      sidebarBackground: "#161B27", // slightly lighter than surface
       text: "#E0E0E0",
       textSecondary: "#A0A0A0",
       error: "#EF4444",
@@ -62,6 +65,7 @@ export const themes: ThemeConfig[] = [
       accent: "#10B981",
       background: "#ECFDF5",
       surface: "#D1FAE5",
+      sidebarBackground: "#C7F0D9",
       text: "#064E3B",
       textSecondary: "#065F46",
       error: "#B91C1C",
@@ -80,6 +84,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FACC15",
       background: "#F1F5F9",
       surface: "#FFFFFF",
+      sidebarBackground: "#E2E8F0",
       text: "#1E293B",
       textSecondary: "#475569",
       error: "#B91C1C",
@@ -98,6 +103,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FCD34D",
       background: "#FFF7ED",
       surface: "#FEF3C7",
+      sidebarBackground: "#FFE6B3",
       text: "#3F3F46",
       textSecondary: "#6B7280",
       error: "#B91C1C",
@@ -116,6 +122,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FBBF24",
       background: "#ECFDF5",
       surface: "#D1FAE5",
+      sidebarBackground: "#C7F0D9",
       text: "#064E3B",
       textSecondary: "#065F46",
       error: "#B91C1C",
@@ -126,7 +133,6 @@ export const themes: ThemeConfig[] = [
       iconSecondary: "#065F46",
     },
   },
-  // Exciting new themes
   {
     name: "sunset-blush",
     colors: {
@@ -135,6 +141,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FFD93D",
       background: "#FFF0F5",
       surface: "#FFE4E1",
+      sidebarBackground: "#FFD6D9",
       text: "#4B1D3F",
       textSecondary: "#7B2D5D",
       error: "#D32F2F",
@@ -153,6 +160,7 @@ export const themes: ThemeConfig[] = [
       accent: "#00E676",
       background: "#E0F7FA",
       surface: "#B2EBF2",
+      sidebarBackground: "#9DECF6",
       text: "#014F86",
       textSecondary: "#0277BD",
       error: "#D32F2F",
@@ -171,6 +179,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FFC300",
       background: "#0B0B1C",
       surface: "#1A1A2E",
+      sidebarBackground: "#14142A",
       text: "#E5E5E5",
       textSecondary: "#A0A0A0",
       error: "#FF0000",
@@ -189,6 +198,7 @@ export const themes: ThemeConfig[] = [
       accent: "#FFD6F2",
       background: "#F9F5FF",
       surface: "#EDE7F6",
+      sidebarBackground: "#E3DDF0",
       text: "#4B0082",
       textSecondary: "#7B5FA0",
       error: "#D32F2F",

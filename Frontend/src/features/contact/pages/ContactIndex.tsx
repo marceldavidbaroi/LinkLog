@@ -5,6 +5,7 @@ import { Box, Paper } from "@mui/material";
 import AddContactDialog from "../components/AddContactDialog";
 import ContactList from "../components/ContactList";
 import type { Person } from "../types/contact.type";
+import DeleteDialog from "../../../components/DeleteDialog";
 
 const ContactIndex = () => {
   const { getAll, create, update, remove } = useContact();
@@ -32,25 +33,49 @@ const ContactIndex = () => {
       last_name: data.last_name ?? "",
       notes: data.notes ?? "",
       phone: data.phone ?? "",
+      address: data.address ?? "",
+      birthday: data.birthday ?? null,
     };
 
     await update(data.id, payload); // errors handled in hook/store
   };
 
-  const deleteContact = async (id: number) => {
-    if (!id) return;
-    await remove(id); // errors handled in hook/store
+  // const deleteContact = async (id: number) => {
+  //   if (!id) return;
+  //   await remove(id); // errors handled in hook/store
+  // };
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const handleDeleteClick = (id: number) => {
+    setSelectedId(id);
+    setDeleteOpen(true);
+  };
+
+  const handleCancel = () => setDeleteOpen(false);
+
+  const handleConfirmDelete = async () => {
+    if (selectedId !== null) {
+      await remove(selectedId); // errors handled in hook/store
+    }
+    setDeleteOpen(false);
   };
   return (
-    <Box component={Paper} elevation={0} className="min-h-screen p-6">
+    <Box component={Paper} elevation={0} className="p-6 flex-1 flex flex-col">
       <ContactList
         contactList={contactStore.contactList}
         onAddContact={handleOpen}
         onEditSubmit={updateContact}
-        onDelete={deleteContact}
+        onDelete={handleDeleteClick}
       />
 
       <AddContactDialog open={open} onClose={handleClose} onSave={handleSave} />
+      <DeleteDialog
+        open={deleteOpen}
+        onCancel={handleCancel}
+        onConfirm={handleConfirmDelete}
+      />
     </Box>
   );
 };

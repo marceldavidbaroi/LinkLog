@@ -8,7 +8,7 @@ export interface Person {
   phone?: string;
   address?: string;
   emergency_contact?: string;
-  birthday?: string;
+  birthday?: string | null;
   notes?: string;
   created_at: string;
   updated_at: string;
