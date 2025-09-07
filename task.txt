@@ -1,0 +1,6 @@
+implement the token refresh in frontend 
+implement the me module 
+    - profile with option to edit credentials 
+    - a theme builder
+    - integrate the theme with be frontend preference 
+implement the diary module 
