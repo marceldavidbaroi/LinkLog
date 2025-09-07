@@ -11,7 +11,7 @@ import useAuthStore from "../../auth/store/authStore";
 
 export default function DashboardIndex() {
   const user = useAuthStore((state) => state.user);
-  console.log(user);
+  // console.log(user);
 
   return (
     <Box

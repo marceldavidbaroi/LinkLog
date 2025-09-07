@@ -1,18 +1,25 @@
 import api from "../../../api/axios";
-import type { LoginResponse, SignupResponse } from "../types/auth";
+import type { LoginResponse } from "../types/auth";
 
 export const loginUser = async (payload: {
   username: string;
   password: string;
 }): Promise<LoginResponse> => {
-  const data = await api.post("/auth/signin", payload);
-  return data;
+  const response = await api.post<LoginResponse>("/auth/signin", payload, {
+    withCredentials: true, // ensures refresh token cookie is sent
+  });
+  console.log(response);
+
+  return response;
 };
 
 export const signupUser = async (payload: {
   username: string;
   password: string;
-}): Promise<SignupResponse> => {
-  const data = await api.post("/auth/signup", payload);
-  return data;
+}): Promise<LoginResponse> => {
+  const response = await api.post<LoginResponse>("/auth/signup", payload, {
+    withCredentials: true,
+  });
+  console.log(response);
+  return response;
 };

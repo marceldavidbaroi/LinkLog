@@ -1,63 +1,56 @@
 import { loginUser, signupUser } from "../api/authApi";
 import useAuthStore from "../store/authStore";
-import type { LoginResponse, SignupResponse } from "../types/auth";
+import type { LoginResponse } from "../types/auth";
 
 export const useAuth = () => {
   const {
     user,
     token,
-    refreshToken,
     loading,
     error,
     setUser,
     setToken,
-    setRefreshToken,
     setLoading,
     setError,
     clearAuth,
   } = useAuthStore();
 
-  const login = async (payload: { username: string; password: string }) => {
+  // helper to handle API calls with loading and error
+  const handleAuthRequest = async (request: () => Promise<LoginResponse>) => {
     setLoading(true);
     setError(null);
+
     try {
-      const data: LoginResponse = await loginUser(payload);
+      const data = await request();
       console.log(data);
       setUser(data.user);
-      setToken(data.accessToken);
-      setRefreshToken(data.refreshToken);
+      setToken(data.accessToken); // store access token in memory
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
+      throw err; // rethrow so caller can handle if needed
     } finally {
       setLoading(false);
     }
   };
 
-  const signup = async (payload: { username: string; password: string }) => {
-    setLoading(true);
-    setError(null);
+  const login = (payload: { username: string; password: string }) =>
+    handleAuthRequest(() => loginUser(payload));
+
+  const signup = (payload: { username: string; password: string }) =>
+    handleAuthRequest(() => signupUser(payload));
+
+  const logout = async () => {
     try {
-      const data: SignupResponse = await signupUser(payload);
-      setUser(data.user);
-      setToken(data.token);
-      setRefreshToken(data.refreshToken);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
+      await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include", // clear HTTP-only cookie
+      });
+    } catch (err) {
+      console.error("Logout error", err);
     } finally {
-      setLoading(false);
+      clearAuth();
     }
   };
 
-  const logout = () => clearAuth();
-
-  return {
-    user,
-    token,
-    refreshToken,
-    loading,
-    error,
-    login,
-    logout,
-    signup,
-  };
+  return { user, token, loading, error, login, signup, logout };
 };

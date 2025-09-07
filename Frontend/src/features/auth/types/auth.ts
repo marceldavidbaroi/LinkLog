@@ -10,27 +10,20 @@ export interface User {
 // Shape of the auth store state
 export interface AuthState {
   user: User | null;
-  token: string | null; // access token
-  refreshToken: string | null; // refresh token
+  token: string | null; // access token in memory
   loading: boolean;
   error: string | null;
 
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
-  setRefreshToken: (refreshToken: string | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearAuth: () => void;
 }
 
+// Response shape for login
 export interface LoginResponse {
   user: User;
   accessToken: string;
-  refreshToken: string;
+  // refreshToken is not returned to frontend; it's stored as HTTP-only cookie
 }
-
-// export interface SignupResponse {
-//   user: User;
-//   token: string;
-//   refreshToken: string;
-// }
