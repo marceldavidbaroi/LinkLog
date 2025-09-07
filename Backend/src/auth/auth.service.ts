@@ -13,6 +13,12 @@ import { User } from './user.entity';
 import { AuthCredentailsDto } from './dto/auth-credentials.dto';
 import { SigninDto } from './dto/sign-in.dto';
 import { UserPreferences } from './userPreferences.entity';
+import type { Response } from 'express';
+
+interface JwtPayload {
+  sub: number;
+  username: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -24,6 +30,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  // ------------------- SIGNUP -------------------
   async signup(
     authCredentailsDto: AuthCredentailsDto,
   ): Promise<{ message: string }> {
@@ -36,8 +43,7 @@ export class AuthService {
       throw new ConflictException('Username already exists');
     }
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.userRepository.create({
       username,
@@ -61,75 +67,91 @@ export class AuthService {
     }
   }
 
-  async signin(authCredentailsDto: SigninDto): Promise<{
-    user: Partial<User>;
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  // ------------------- SIGNIN -------------------
+  async signin(
+    authCredentailsDto: SigninDto,
+    res: Response,
+  ): Promise<{ user: Partial<User>; accessToken: string }> {
     const { username, password } = authCredentailsDto;
 
     const user = await this.userRepository.findOne({ where: { username } });
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+    if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    if (!isPasswordValid)
       throw new UnauthorizedException('Invalid credentials');
-    }
 
-    const payload = { username, sub: user.id };
+    const payload: JwtPayload = { sub: user.id, username };
 
+    // Sign tokens without generic
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-    // Hash the refresh token before saving (for security)
+    // Hash and save refresh token in DB
     user.refreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userRepository.save(user);
 
-    // Don’t expose password or hashed refresh token
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Set httpOnly cookie for refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true, // set to false for local dev HTTP
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Exclude sensitive fields
     const { password: _, refreshToken: __, ...safeUser } = user;
 
-    return { user: safeUser, accessToken, refreshToken };
+    return { user: safeUser, accessToken };
   }
 
-  async refresh(
-    userId: number,
+  // ------------------- REFRESH FROM COOKIE -------------------
+  async refreshFromCookie(
     refreshToken: string,
   ): Promise<{ accessToken: string }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user || !user.refreshToken) {
-      throw new UnauthorizedException('Access Denied');
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
     }
 
-    // Compare hashed refresh token
-    const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
-    if (!isValid) {
+    let payload: JwtPayload;
+    try {
+      payload = this.jwtService.verify<JwtPayload>(refreshToken);
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const payload = { username: user.username, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
-
-    return { accessToken };
-  }
-
-  async logout(userId: number): Promise<void> {
-    // Find the user by ID
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    if (!user) {
-      // Optional: throw error if user not found
-      throw new UnauthorizedException('User not found');
+    const user = await this.userRepository.findOne({
+      where: { id: payload.sub },
+    });
+    if (!user || !user.refreshToken) {
+      throw new UnauthorizedException('User not found or token revoked');
     }
 
-    // Clear the refresh token
-    user.refreshToken = undefined;
+    // Compare hashed token stored in DB
+    const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+    if (!isValid) {
+      throw new UnauthorizedException('Refresh token mismatch');
+    }
 
-    // Save the updated user
+    // Later when issuing new access token
+    const newAccessToken = this.jwtService.sign(
+      { username: user.username, sub: user.id },
+      { expiresIn: '1h' },
+    );
+
+    return { accessToken: newAccessToken };
+  }
+
+  // ------------------- LOGOUT -------------------
+  async logout(userId: number): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    user.refreshToken = undefined;
     await this.userRepository.save(user);
   }
+
+  // ------------------- GET PROFILE -------------------
   async getProfile(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -137,7 +159,6 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('User not found');
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, refreshToken, ...safeUser } = user;
 
     return {
@@ -146,6 +167,7 @@ export class AuthService {
     };
   }
 
+  // ------------------- UPDATE PROFILE -------------------
   async updateProfile(userId: number, updateData: Partial<User>) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -153,11 +175,11 @@ export class AuthService {
     Object.assign(user, updateData);
     await this.userRepository.save(user);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, refreshToken, ...safeUser } = user;
     return safeUser;
   }
 
+  // ------------------- UPDATE PREFERENCES -------------------
   async updatePreferences(
     userId: number,
     updateData: { frontend?: any; backend?: any },
@@ -167,7 +189,6 @@ export class AuthService {
     });
 
     if (!prefs) {
-      // Create if not exist
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) throw new NotFoundException('User not found');
 
@@ -178,10 +199,7 @@ export class AuthService {
       });
     }
 
-    // Merge updates without overwriting other fields
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     prefs.frontend = { ...prefs.frontend, ...updateData.frontend };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     prefs.backend = { ...prefs.backend, ...updateData.backend };
 
     await this.preferencesRepository.save(prefs);

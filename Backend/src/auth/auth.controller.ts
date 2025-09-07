@@ -1,11 +1,21 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UseGuards,
+  Req,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthCredentailsDto } from './dto/auth-credentials.dto';
 import { AuthService } from './auth.service';
-// import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './get-user.decorator';
 import { User } from './user.entity';
 import { SigninDto } from './dto/sign-in.dto';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -21,20 +31,32 @@ export class AuthController {
   @Post('/signin')
   signIn(
     @Body() authCredentailsDto: SigninDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    return this.authService.signin(authCredentailsDto);
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ user: Partial<User>; accessToken: string }> {
+    return this.authService.signin(authCredentailsDto, res);
   }
 
   @Post('/refresh')
-  refresh(
-    @Body() body: { userId: number; refreshToken: string },
-  ): Promise<{ accessToken: string }> {
-    return this.authService.refresh(body.userId, body.refreshToken);
+  refresh(@Req() req: Request): Promise<{ accessToken: string }> {
+    // Type assertion to satisfy TypeScript/ESLint
+    const cookies = req.cookies as Record<string, string>;
+    const refreshToken = cookies['refreshToken'];
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token found');
+    }
+
+    return this.authService.refreshFromCookie(refreshToken);
   }
 
   @Post('/logout')
-  logout(@Body() body: { userId: number }): Promise<void> {
-    return this.authService.logout(body.userId);
+  @UseGuards(AuthGuard('jwt')) // ensure user is authenticated
+  logout(
+    @GetUser() user: User,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    res.clearCookie('refreshToken'); // clear cookie on client
+    return this.authService.logout(user.id); // clear token in DB
   }
 
   @Get('/me')
@@ -57,10 +79,4 @@ export class AuthController {
   ) {
     return this.authService.updatePreferences(user.id, updateData);
   }
-
-  // @Get('/test')
-  // @UseGuards(AuthGuard('jwt'))
-  // getProfile(@GetUser() user: User) {
-  //   console.log(user);
-  // }
 }
