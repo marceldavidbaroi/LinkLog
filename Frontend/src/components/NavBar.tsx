@@ -49,12 +49,7 @@ export default function NavBar() {
         {user && (
           <>
             <Divider />
-            <ListItem
-              button
-              component={Link}
-              to="/profile"
-              onClick={toggleDrawer}
-            >
+            <ListItem button component={Link} to="/me" onClick={toggleDrawer}>
               <ListItemText primary="Profile" />
             </ListItem>
             <ListItem
@@ -136,11 +131,7 @@ export default function NavBar() {
                     horizontal: "right",
                   }}
                 >
-                  <MenuItem
-                    component={Link}
-                    to="/profile"
-                    onClick={handleClose}
-                  >
+                  <MenuItem component={Link} to="/me" onClick={handleClose}>
                     Me
                   </MenuItem>
                   <MenuItem

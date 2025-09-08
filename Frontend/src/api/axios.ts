@@ -30,7 +30,24 @@ api.interceptors.response.use(
       notify("Operation successful!", "success");
     }
 
-    return response.data; // return only the response payload
+    const data = response.data;
+
+    // If backend already follows ApiResponse format → keep it
+    if (
+      data &&
+      typeof data === "object" &&
+      "success" in data &&
+      "message" in data
+    ) {
+      return data;
+    }
+
+    // Otherwise, wrap raw payload
+    return {
+      success: true,
+      message: "OK",
+      data,
+    };
   },
   async (error: AxiosError & { config?: AxiosRequestConfig }) => {
     const notify = useNotificationStore.getState().setNotification;

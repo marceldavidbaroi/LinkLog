@@ -1,7 +1,7 @@
 import MainLayout from "../../layouts/MainLayout";
 import type { AppRouteObject } from "../../types/route.type";
-import ContactIndex from "./pages/Profile";
+import ProfileIndex from "./pages/ProfileIndex";
 
-export const ContactRoutes: AppRouteObject[] = [
-  { path: "/me", element: <ContactIndex />, layout: MainLayout },
+export const MeRoutes: AppRouteObject[] = [
+  { path: "/me", element: <ProfileIndex />, layout: MainLayout },
 ];

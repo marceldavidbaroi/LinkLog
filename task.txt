@@ -1,5 +1,4 @@
-implement the token refresh in frontend 
-implement the me module 
+fix reload logouts
     - profile with option to edit credentials 
     - a theme builder
     - integrate the theme with be frontend preference 
