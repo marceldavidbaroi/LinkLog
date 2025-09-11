@@ -104,7 +104,7 @@ export default function NavBar() {
           <Box
             sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
           >
-            <Button color="inherit" component={Link} to="/diary">
+            <Button color="inherit" component={Link} to="/interactions">
               Diary
             </Button>
 

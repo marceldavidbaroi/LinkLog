@@ -1,71 +1,66 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
-  Button,
   Typography,
-  Autocomplete,
-  TextField,
+  Paper,
+  CircularProgress,
+  Button,
 } from "@mui/material";
-import AddPersonDialog from "../../contact/components/AddContactDialog";
+import { useInteraction } from "../hooks/interactionAuth";
+import useInteractionStore from "../store/interactionStore";
 
-interface Person {
-  id: number;
-  name: string;
-  notes?: string;
-}
+const InteractionIndexPage = () => {
+  const { getAll } = useInteraction();
+  const { interactionList, loading, error } = useInteractionStore();
+  const navigate = useNavigate();
 
-export default function PeoplePage() {
-  const [people, setPeople] = useState<Person[]>([
-    { id: 1, name: "Alice" },
-    { id: 2, name: "Bob" },
-    { id: 3, name: "Charlie" },
-  ]);
-
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleAddPerson = (name: string, notes: string) => {
-    const newPerson: Person = {
-      id: people.length + 1,
-      name,
-      notes,
-    };
-    setPeople([...people, newPerson]);
-    setSelectedPerson(newPerson);
-  };
+  useEffect(() => {
+    getAll();
+  }, []);
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        People Manager
-      </Typography>
-
-      <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
-        <Autocomplete
-          options={people}
-          getOptionLabel={(option) => option.name}
-          value={selectedPerson}
-          onChange={(_, newValue) => setSelectedPerson(newValue)}
-          sx={{ width: 250 }}
-          renderInput={(params) => (
-            <TextField {...params} label="Select Person" />
-          )}
-        />
-
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+        <Typography variant="h4">Interactions</Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setDialogOpen(true)}
+          onClick={() => navigate("/interactions/create")}
         >
-          Add Person
+          Create Interaction
         </Button>
       </Box>
 
-      <AddPersonDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleAddPerson}
-      />
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && (
+        <Typography color="error" sx={{ my: 2 }}>
+          {error}
+        </Typography>
+      )}
+
+      {interactionList.length === 0 && !loading && (
+        <Typography>No interactions found.</Typography>
+      )}
+
+      {interactionList.map((interaction) => (
+        <Paper
+          key={interaction.id}
+          sx={{ p: 3, mb: 2, borderRadius: 2, boxShadow: 1 }}
+        >
+          <Typography variant="h6">{interaction.title}</Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {interaction.description}
+          </Typography>
+        </Paper>
+      ))}
     </Box>
   );
-}
+};
+
+export default InteractionIndexPage;

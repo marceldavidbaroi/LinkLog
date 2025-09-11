@@ -1,4 +1,1 @@
-    - profile with option to edit credentials 
-    - a theme builder
-    - integrate the theme with be frontend preference 
-implement the diary module 
+add update and delete to the diary
