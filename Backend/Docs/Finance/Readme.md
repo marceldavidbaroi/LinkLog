@@ -104,6 +104,47 @@ Tracks income and expenses.
 | created_at         | timestamp        | Record creation                        |
 | updated_at         | timestamp        | Record update                          |
 
+### 📝 Enum Notes
+
+- **type**
+  - `income`
+  - `expense`
+
+- **category**
+  - **Income categories**
+    - `salary`
+    - `freelance`
+    - `business`
+    - `investment`
+    - `rental_income`
+    - `gift`
+    - `refund`
+    - `other_income`
+  - **Expense categories**
+    - `food_groceries`
+    - `food_dining`
+    - `housing_rent`
+    - `housing_mortgage`
+    - `utilities`
+    - `transportation`
+    - `health_medical`
+    - `education`
+    - `entertainment`
+    - `shopping`
+    - `travel`
+    - `personal_care`
+    - `insurance`
+    - `debt_repayment`
+    - `savings_investments`
+    - `charity_donation`
+    - `other_expense`
+
+- **recurring_interval**
+  - `daily`
+  - `weekly`
+  - `monthly`
+  - `yearly`
+
 ---
 
 ## 3. Budgets Table
@@ -178,15 +219,43 @@ This document lists all REST API endpoints for the Personal Finance App, organiz
 
 **Base URL:** `/transactions`
 
-| Method | Endpoint                  | Description                                                                                        |
-| ------ | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/transactions`           | Get all transactions for the authenticated user (supports filters like date range, type, category) |
-| GET    | `/transactions/:id`       | Get details of a single transaction                                                                |
-| POST   | `/transactions`           | Create a new transaction                                                                           |
-| PUT    | `/transactions/:id`       | Update an existing transaction                                                                     |
-| DELETE | `/transactions/:id`       | Delete a transaction                                                                               |
-| POST   | `/transactions/quick-add` | Quick add transaction (minimal fields: type, amount, category)                                     |
-| GET    | `/transactions/summary`   | Get total income vs expenses or category-based totals for dashboard                                |
+All endpoints require **JWT authentication**.
+
+| Endpoint            | Method | Request Body / Query                                                                                                                                                                                   |
+| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/transactions`     | POST   | `json {   "type": "income",   "category": "salary",   "amount": 2500.5,   "date": "2025-09-12T10:30:00Z",   "description": "Monthly salary",   "recurring": true,   "recurring_interval": "monthly" }` |
+| `/transactions`     | GET    | Query Params: `type` (income/expense), `category`, `startDate` (ISO), `endDate` (ISO), `page` (number, default 1), `limit` (number, default 25)                                                        |
+| `/transactions/:id` | GET    | -                                                                                                                                                                                                      |
+| `/transactions/:id` | PATCH  | `json {   "amount": 3000,   "description": "Updated description" }`                                                                                                                                    |
+| `/transactions/:id` | DELETE | -                                                                                                                                                                                                      |
+|                     |
+
+---
+
+### DTOs Overview
+
+### `CreateTransactionDto`
+
+| Field              | Type                                       | Required | Notes                             |
+| ------------------ | ------------------------------------------ | -------- | --------------------------------- |
+| type               | enum (`income` / `expense`)                | ✅       | Transaction type                  |
+| category           | enum                                       | ✅       | IncomeCategory or ExpenseCategory |
+| amount             | number                                     | ✅       | Transaction amount                |
+| date               | ISO string                                 | ✅       | Transaction date                  |
+| description        | string                                     | ❌       | Optional notes                    |
+| recurring          | boolean                                    | ❌       | Defaults to `false`               |
+| recurring_interval | enum (`daily`,`weekly`,`monthly`,`yearly`) | ❌       | Required if `recurring=true`      |
+
+### `FindTransactionsDto` (Query)
+
+| Field     | Type       | Default | Optional | Notes                    |
+| --------- | ---------- | ------- | -------- | ------------------------ |
+| type      | enum       | -       | ✅       | Filter by income/expense |
+| category  | string     | -       | ✅       | Filter by category       |
+| startDate | ISO string | -       | ✅       | Filter from date         |
+| endDate   | ISO string | -       | ✅       | Filter to date           |
+| page      | number     | 1       | ✅       | Pagination page          |
+| limit     | number     | 25      | ✅       | Items per page (max 100) |
 
 ---
 

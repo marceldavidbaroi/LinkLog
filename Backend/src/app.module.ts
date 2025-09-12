@@ -6,6 +6,7 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { PeopleModule } from './people/people.module';
 import { InteractionsModule } from './interactions/interactions.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -16,6 +17,7 @@ dotenv.config();
     AuthModule,
     PeopleModule,
     InteractionsModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

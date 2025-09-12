@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Interactions } from 'src/interactions/interactions.entity';
 import { UserPreferences } from './userPreferences.entity';
+import { Transactions } from 'src/transactions/transactions.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -41,4 +42,7 @@ export class User extends BaseEntity {
 
   @OneToOne(() => UserPreferences, (pref) => pref.user, { cascade: true })
   preferences: UserPreferences;
+
+  @OneToMany(() => Transactions, (transaction) => transaction.user)
+  transactions: Transactions[];
 }
