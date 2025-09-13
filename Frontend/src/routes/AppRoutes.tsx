@@ -5,6 +5,7 @@ import { dashboardRoutes } from "../features/dashboard/routes";
 import { interactionRoutes } from "../features/interaction/routes";
 import { ContactRoutes } from "../features/contact/routes";
 import { MeRoutes } from "../features/me/routes";
+import { FinanceRoutes } from "../features/finance/routes";
 
 export default function AppRoutes() {
   const allRoutes: AppRouteObject[] = [
@@ -13,6 +14,7 @@ export default function AppRoutes() {
     ...interactionRoutes,
     ...ContactRoutes,
     ...MeRoutes,
+    ...FinanceRoutes,
   ];
 
   const element = useRoutes(

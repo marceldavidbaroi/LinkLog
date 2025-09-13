@@ -74,7 +74,7 @@ export class TransactionsService {
     }
 
     const [data, total] = await query
-      .orderBy('transaction.date', 'DESC')
+      .orderBy('transaction.updated_at', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -85,7 +85,7 @@ export class TransactionsService {
   /** Find a single transaction by numeric ID */
   async findOne(id: number, user: User): Promise<Transactions> {
     const transaction = await this.transactionsRepository.findOne({
-      where: { id, user },
+      where: { id, user: { id: user.id } },
     });
 
     if (!transaction) {

@@ -47,14 +47,7 @@ export class TransactionsController {
   async findAll(
     @Query() query: FindTransactionsDto,
     @GetUser() user: User,
-  ): Promise<
-    ApiResponse<{
-      items: Transactions[];
-      total: number;
-      page: number;
-      limit: number;
-    }>
-  > {
+  ): Promise<ApiResponse<Transactions[]>> {
     const { data, total, page, limit } = await this.transactionsService.findAll(
       user,
       query,
@@ -63,8 +56,8 @@ export class TransactionsController {
     return {
       success: true,
       message: 'Transactions fetched successfully',
-      data: {
-        items: data,
+      data, // the actual array of transactions
+      meta: {
         total,
         page,
         limit,
