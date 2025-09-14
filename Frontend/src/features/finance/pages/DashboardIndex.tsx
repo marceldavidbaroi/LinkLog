@@ -12,7 +12,7 @@ import { FullCategoriesView } from "../components/FullCategoriesView";
 type ViewType = "summary" | "category" | "full";
 
 const FinanceDashboardIndex = () => {
-  const { summary } = useTransactions();
+  const { overview } = useTransactions();
   const transactionStore = useTransactionsStore();
   const [view, setView] = useState<ViewType>("summary");
 
@@ -20,7 +20,7 @@ const FinanceDashboardIndex = () => {
     const now = new Date();
     const startDate = format(startOfMonth(now), "yyyy-MM-dd");
     const endDate = format(endOfMonth(now), "yyyy-MM-dd");
-    await summary({ startDate, endDate });
+    await overview({ startDate, endDate });
   };
 
   useEffect(() => {

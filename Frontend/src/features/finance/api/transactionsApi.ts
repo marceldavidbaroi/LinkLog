@@ -28,11 +28,11 @@ const update = async (payload: {
 const remove = async (id: number): Promise<ApiResponse<null>> => {
   return await api.delete(`/transactions/${id}`);
 };
-const summary = async (params?: {
+const overview = async (params?: {
   startDate?: string;
   endDate?: string;
 }): Promise<ApiResponse<TransactionSummary>> => {
-  return await api.get("/transactions/summary", { params });
+  return await api.get("/dashboard/overview", { params });
 };
 const Api = {
   create,
@@ -40,7 +40,7 @@ const Api = {
   getOne,
   update,
   remove,
-  summary,
+  overview,
 };
 
 export default Api;

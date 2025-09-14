@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { PeopleModule } from './people/people.module';
 import { InteractionsModule } from './interactions/interactions.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -18,6 +19,7 @@ dotenv.config();
     PeopleModule,
     InteractionsModule,
     TransactionsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

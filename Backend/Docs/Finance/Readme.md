@@ -259,12 +259,12 @@ All endpoints require **JWT authentication**.
 
 **Base URL:** `/dashboard`
 
-| Method | Endpoint                        | Description                                                                     |
-| ------ | ------------------------------- | ------------------------------------------------------------------------------- |
-| GET    | `/dashboard/overview`           | Returns summary: total income, total expenses, net savings, recent transactions |
-| GET    | `/dashboard/category-spending`  | Returns spending per category (for charts)                                      |
-| GET    | `/dashboard/monthly-comparison` | Compares current vs previous months                                             |
-| GET    | `/dashboard/alerts`             | Alerts for overspending or approaching budget limits                            |
+| Method | Endpoint                        | Description                                                                                    |
+| ------ | ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/dashboard/overview`           | Returns summary: total income, total expenses, net savings, spending per category (for charts) |
+|        |
+| GET    | `/dashboard/monthly-comparison` | Compares current vs previous months                                                            |
+| GET    | `/dashboard/alerts`             | Alerts for overspending or approaching budget limits                                           |
 
 ---
 

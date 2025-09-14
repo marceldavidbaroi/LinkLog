@@ -99,11 +99,11 @@ export const useTransactions = () => {
     }
   };
 
-  const summary = async (query: { startDate: string; endDate: string }) => {
+  const overview = async (query: { startDate: string; endDate: string }) => {
     setLoading(true);
     setError(null);
     try {
-      const { data }: ApiResponse<TransactionSummary> = await Api.summary(
+      const { data }: ApiResponse<TransactionSummary> = await Api.overview(
         query
       );
       setTransactionSummary(data || null);
@@ -120,6 +120,6 @@ export const useTransactions = () => {
     getById,
     update,
     remove,
-    summary,
+    overview,
   };
 };
