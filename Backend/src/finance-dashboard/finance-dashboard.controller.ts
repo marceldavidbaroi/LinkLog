@@ -4,12 +4,12 @@ import { SummaryQueryDto } from './dto/overview.dto.';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { ApiResponse } from 'src/common/types/api-response.type';
-import { DashboardService } from './dashboard.service';
+import { FinanceDashboardService } from './finance-dashboard.service';
 
 @Controller('dashboard')
 @UseGuards(AuthGuard('jwt'))
-export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {}
+export class FinanceDashboardController {
+  constructor(private readonly dashboardService: FinanceDashboardService) {}
 
   /** Get summary grouped by category */
   @Get('overview')

@@ -5,7 +5,7 @@ import { Transactions } from 'src/transactions/transactions.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class DashboardService {
+export class FinanceDashboardService {
   constructor(
     @InjectRepository(Transactions)
     private transactionsRepository: Repository<Transactions>,
