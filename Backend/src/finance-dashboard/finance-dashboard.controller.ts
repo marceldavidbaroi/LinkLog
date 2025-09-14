@@ -1,6 +1,9 @@
 import { Body, Controller, UseGuards, Get, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { SummaryQueryDto } from './dto/overview.dto.';
+import {
+  SummaryQueryDto,
+  CompareMonthQueryDto,
+} from './dto/finance-dashboard.dto.';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { ApiResponse } from 'src/common/types/api-response.type';
@@ -46,6 +49,47 @@ export class FinanceDashboardController {
       success: true,
       message: 'Transaction summary fetched successfully',
       data: summary,
+    };
+  }
+
+  /** New endpoint: compare current month with previous month */
+  @Get('compare-month')
+  async compareMonth(
+    @GetUser() user: User,
+    @Query() query: CompareMonthQueryDto, // expects { startDate: 'yyyy-mm-dd' }
+  ): Promise<
+    ApiResponse<{
+      overview: {
+        income: { prev: number; current: number; percentage: number };
+        expense: { prev: number; current: number; percentage: number };
+        savings: { prev: number; current: number; percentage: number };
+      };
+      details: {
+        category: string;
+        type: 'income' | 'expense';
+        prev: number;
+        current: number;
+        percentage: number;
+      }[];
+    }>
+  > {
+    if (!query.startDate) {
+      return {
+        success: false,
+        message: 'startDate query parameter is required (yyyy-mm-dd)',
+        data: undefined,
+      };
+    }
+
+    const result = await this.dashboardService.compareWithPreviousMonth(
+      user,
+      query.startDate,
+    );
+
+    return {
+      success: true,
+      message: 'Month comparison fetched successfully',
+      data: result,
     };
   }
 }
