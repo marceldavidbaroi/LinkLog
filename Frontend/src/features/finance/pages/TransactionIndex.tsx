@@ -60,6 +60,7 @@ const TransactionsIndex = () => {
     setDialogDetailsOpen(false);
     transactionStore.setTransaction(null);
   };
+
   const handleAdd = () => {
     setEditingTransaction(null); // null = creating new
     setDialogFormOpen(true);
@@ -79,16 +80,19 @@ const TransactionsIndex = () => {
       await create(data);
     }
   };
+
   const handleDelete = (id: number) => {
     setSelectedTransactionId(id);
     setDialogDeleteOpen(true);
   };
+
   const handleConfirmDelete = async () => {
     if (selectedTransactionId) {
       await remove(selectedTransactionId);
       setDialogDeleteOpen(false);
     }
   };
+
   const showTransactionDetails = async (id: number) => {
     await getById(id);
     setDialogDetailsOpen(true);
@@ -229,13 +233,19 @@ const TransactionsIndex = () => {
             label="Start Date"
             value={filters.startDate ? new Date(filters.startDate) : null}
             onChange={handleStartDateChange}
-            slotProps={{ textField: { size: "small" } }}
+            slotProps={{
+              textField: { size: "small" },
+              actionBar: { actions: ["clear"] },
+            }}
           />
           <DatePicker
             label="End Date"
             value={filters.endDate ? new Date(filters.endDate) : null}
             onChange={handleEndDateChange}
-            slotProps={{ textField: { size: "small" } }}
+            slotProps={{
+              textField: { size: "small" },
+              actionBar: { actions: ["clear"] },
+            }}
           />
         </Box>
       </LocalizationProvider>
@@ -287,9 +297,14 @@ const TransactionsIndex = () => {
                     color:
                       row.type === "expense" ? "error.main" : "success.main",
                     fontWeight: "bold",
+                    textAlign: "right", // align right
                   }}
                 >
-                  {row.amount} Tk
+                  {(typeof row.amount === "number"
+                    ? row.amount
+                    : Number(row.amount)
+                  ).toFixed(2)}{" "}
+                  Tk
                 </TableCell>
                 <TableCell>
                   <IconButton

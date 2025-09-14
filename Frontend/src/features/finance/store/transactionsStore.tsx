@@ -7,11 +7,13 @@ export const useTransactionsStore = create(
     (set) => ({
       transactionList: [],
       transaction: null,
+      summary: null,
       loading: false,
       error: null,
 
       setTransactionList: (transactionList) => set({ transactionList }),
       setTransaction: (transaction) => set({ transaction }),
+      setTransactionSummary: (summary) => set({ summary }),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
     }),

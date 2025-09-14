@@ -36,12 +36,12 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
 }) => {
   const [form, setForm] = useState<Partial<Transaction>>({
     amount: null,
-    category: "",
+    category: null,
     date: null,
     description: "",
     type: "income",
     recurring: false,
-    recurring_interval: "",
+    recurring_interval: null,
   });
 
   const [errors, setErrors] = useState<
@@ -58,7 +58,7 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
 
       setForm({
         amount: transaction.amount ?? null,
-        category: catList.includes(transaction.category ?? "")
+        category: catList.includes(transaction.category ?? null)
           ? transaction.category
           : "",
         date: transaction.date ? new Date(transaction.date) : null,
@@ -71,7 +71,7 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
       setForm({
         amount: null,
         category: null,
-        date: null,
+        date: new Date(),
         description: "",
         type: "income",
         recurring: false,

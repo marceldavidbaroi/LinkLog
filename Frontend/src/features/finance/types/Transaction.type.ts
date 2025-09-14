@@ -83,6 +83,21 @@ export const recurringIntervals: RecurringInterval[] = [
   "yearly",
 ];
 
+export interface TransactionSummary {
+  income: {
+    category: string;
+    total: number;
+  }[];
+  expense: {
+    category: string;
+    total: number;
+  }[];
+  total: {
+    income: number;
+    expense: number;
+  };
+}
+
 export interface FindTransactionsParams {
   type?: TransactionType;
   category?: IncomeCategory | ExpenseCategory;
@@ -95,11 +110,13 @@ export interface FindTransactionsParams {
 export interface TransactionsState {
   transactionList: Transaction[] | [];
   transaction: Transaction | null;
+  summary: TransactionSummary | null;
   loading: boolean;
   error: string | null;
 
   setTransactionList: (list: Transaction[]) => void;
   setTransaction: (transaction: Transaction | null) => void;
+  setTransactionSummary: (summary: TransactionSummary | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }

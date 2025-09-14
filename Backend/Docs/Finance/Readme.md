@@ -13,11 +13,7 @@ These are essential for users to start tracking their finances.
 - Add, edit, delete transactions
 - Categorize transactions (Food, Rent, Entertainment, etc.)
 - Mark transactions as recurring
-
-**Suggestions:**
-
-- Include a “quick add transaction” button for better UX
-- Show visual indicators (bars/pie charts) for category spending
+- summery of transaction
 
 ### 2. Dashboard / Overview
 
@@ -221,14 +217,14 @@ This document lists all REST API endpoints for the Personal Finance App, organiz
 
 All endpoints require **JWT authentication**.
 
-| Endpoint            | Method | Request Body / Query                                                                                                                                                                                   |
-| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/transactions`     | POST   | `json {   "type": "income",   "category": "salary",   "amount": 2500.5,   "date": "2025-09-12T10:30:00Z",   "description": "Monthly salary",   "recurring": true,   "recurring_interval": "monthly" }` |
-| `/transactions`     | GET    | Query Params: `type` (income/expense), `category`, `startDate` (ISO), `endDate` (ISO), `page` (number, default 1), `limit` (number, default 25)                                                        |
-| `/transactions/:id` | GET    | -                                                                                                                                                                                                      |
-| `/transactions/:id` | PATCH  | `json {   "amount": 3000,   "description": "Updated description" }`                                                                                                                                    |
-| `/transactions/:id` | DELETE | -                                                                                                                                                                                                      |
-|                     |
+| Endpoint                | Method | Request Body / Query                                                                                                                                                                                   |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/transactions`         | POST   | `json {   "type": "income",   "category": "salary",   "amount": 2500.5,   "date": "2025-09-12T10:30:00Z",   "description": "Monthly salary",   "recurring": true,   "recurring_interval": "monthly" }` |
+| `/transactions`         | GET    | Query Params: `type` (income/expense), `category`, `startDate` (ISO), `endDate` (ISO), `page` (number, default 1), `limit` (number, default 25)                                                        |
+| `/transactions/:id`     | GET    | -                                                                                                                                                                                                      |
+| `/transactions/:id`     | PATCH  | `json {   "amount": 3000,   "description": "Updated description" }`                                                                                                                                    |
+| `/transactions/:id`     | DELETE | -                                                                                                                                                                                                      |
+| `/transactions/summary` | GET    | Query Params: `startDate` (ISO), `endDate` (ISO)                                                                                                                                                       |
 
 ---
 

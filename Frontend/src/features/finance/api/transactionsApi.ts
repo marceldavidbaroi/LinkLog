@@ -3,6 +3,7 @@ import type { ApiResponse } from "../../../types/api-response.type";
 import type {
   FindTransactionsParams,
   Transaction,
+  TransactionSummary,
 } from "../types/Transaction.type";
 
 const create = async (
@@ -27,13 +28,19 @@ const update = async (payload: {
 const remove = async (id: number): Promise<ApiResponse<null>> => {
   return await api.delete(`/transactions/${id}`);
 };
-
+const summary = async (params?: {
+  startDate?: string;
+  endDate?: string;
+}): Promise<ApiResponse<TransactionSummary>> => {
+  return await api.get("/transactions/summary", { params });
+};
 const Api = {
   create,
   getAll,
   getOne,
   update,
   remove,
+  summary,
 };
 
 export default Api;

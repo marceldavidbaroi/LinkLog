@@ -14,7 +14,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { FindTransactionsDto } from './dto/find-transaction.dto';
+import {
+  FindTransactionsDto,
+  SummaryQueryDto,
+} from './dto/find-transaction.dto';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { Transactions } from './transactions.entity';
@@ -62,6 +65,44 @@ export class TransactionsController {
         page,
         limit,
       },
+    };
+  }
+  /** Get summary grouped by category */
+
+  @Get('summary')
+  async getSummary(
+    @GetUser() user: User,
+    @Query() query: SummaryQueryDto,
+  ): Promise<
+    ApiResponse<{
+      income: { category: string; total: number }[];
+      expense: { category: string; total: number }[];
+      total: { income: number; expense: number };
+    }>
+  > {
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    if (query.startDate) {
+      // Convert YYYY-MM-DD → start of day ISO string
+      startDate = new Date(`${query.startDate}T00:00:00`).toISOString();
+    }
+
+    if (query.endDate) {
+      // Convert YYYY-MM-DD → end of day ISO string
+      endDate = new Date(`${query.endDate}T23:59:59`).toISOString();
+    }
+
+    const summary = await this.transactionsService.getSummary(
+      user,
+      startDate,
+      endDate,
+    );
+
+    return {
+      success: true,
+      message: 'Transaction summary fetched successfully',
+      data: summary,
     };
   }
 

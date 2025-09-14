@@ -16,21 +16,21 @@ Authentication is handled via JWT. All finance features live under `/finance/...
   - Task: Fetch & display all transactions (paginated).
   - Features:
     - Filters: date range, type (income/expense), category
-    - Table or card layout
+    - Table layout
     - Buttons: **Add**, **Edit**, **Delete**
 
-- **`/finance/transactions/new` → `TransactionFormModal`**
+- **`/finance/transactions/summery` → `TransactionChart`**
 
-  - Task: Create transaction (form fields: type, category, amount, date, description, recurring).
-  - Feature: “Quick Add” button with minimal fields (type, amount, category).
+  - Task: Create a chart that shows Income Expense and Total Income and Expense
 
+<!--
 - **`/finance/transactions/:id/edit` → `TransactionFormModal`**
 
   - Task: Edit an existing transaction.
   - Pre-fill form with transaction data.
 
 - **`/finance/transactions/:id` → `TransactionDetailsPage`** _(optional)_
-  - Task: View a single transaction with full details.
+  - Task: View a single transaction with full details. -->
 
 ---
 

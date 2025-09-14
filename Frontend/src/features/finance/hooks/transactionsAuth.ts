@@ -1,7 +1,10 @@
 import type { ApiResponse } from "../../../types/api-response.type";
 import Api from "../api/transactionsApi";
 import { useTransactionsStore } from "../store/transactionsStore";
-import type { Transaction } from "../types/Transaction.type";
+import type {
+  Transaction,
+  TransactionSummary,
+} from "../types/Transaction.type";
 
 export const useTransactions = () => {
   const {
@@ -10,6 +13,7 @@ export const useTransactions = () => {
     setError,
     transactionList,
     setTransactionList,
+    setTransactionSummary,
   } = useTransactionsStore();
 
   /** Create a new transaction */
@@ -95,11 +99,27 @@ export const useTransactions = () => {
     }
   };
 
+  const summary = async (query: { startDate: string; endDate: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data }: ApiResponse<TransactionSummary> = await Api.summary(
+        query
+      );
+      setTransactionSummary(data || null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     create,
     getAll,
     getById,
     update,
     remove,
+    summary,
   };
 };

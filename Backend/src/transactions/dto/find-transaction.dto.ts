@@ -6,6 +6,7 @@ import {
   Max,
   IsDateString,
   IsString,
+  Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -44,4 +45,18 @@ export class FindTransactionsDto {
   @Min(1)
   @Max(100)
   limit?: number = 25;
+}
+
+export class SummaryQueryDto {
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'startDate must be in the format YYYY-MM-DD',
+  })
+  startDate?: string;
+
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'endDate must be in the format YYYY-MM-DD',
+  })
+  endDate?: string;
 }
