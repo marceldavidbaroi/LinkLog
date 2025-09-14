@@ -16,13 +16,18 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../features/auth/store/authStore";
 import ThemeSelector from "./ThemeSelector";
 
 export default function NavBar() {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorElFinance, setAnchorElFinance] = useState<null | HTMLElement>(
+    null
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -33,59 +38,18 @@ export default function NavBar() {
     setAnchorEl(null);
   };
 
+  const handleFinanceOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorElFinance(event.currentTarget);
+  };
+
+  const handleFinanceClose = (path?: string) => {
+    setAnchorElFinance(null);
+    if (path) navigate(path);
+  };
+
   const toggleDrawer = () => {
     setMobileOpen(!mobileOpen);
   };
-
-  const drawer = (
-    <Box sx={{ width: 250 }} role="presentation">
-      <List>
-        <ListItem button component={Link} to="/" onClick={toggleDrawer}>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem button component={Link} to="/diary" onClick={toggleDrawer}>
-          <ListItemText primary="Diary" />
-        </ListItem>
-        {user && (
-          <>
-            <Divider />
-            <ListItem button component={Link} to="/me" onClick={toggleDrawer}>
-              <ListItemText primary="Profile" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/contact"
-              onClick={toggleDrawer}
-            >
-              <ListItemText primary="Contact" />
-            </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/logout"
-              onClick={toggleDrawer}
-            >
-              <ListItemText primary="Logout" />
-            </ListItem>
-            <ListItem>
-              <ThemeSelector mobile /> {/* collapsible theme selector */}
-            </ListItem>
-          </>
-        )}
-        {!user && (
-          <ListItem
-            button
-            component={Link}
-            to="/auth/login"
-            onClick={toggleDrawer}
-          >
-            <ListItemText primary="Login" />
-          </ListItem>
-        )}
-      </List>
-    </Box>
-  );
 
   return (
     <>
@@ -108,6 +72,35 @@ export default function NavBar() {
               Diary
             </Button>
 
+            {/* New Finance dropdown */}
+            <Button color="inherit" onClick={handleFinanceOpen}>
+              Finance
+            </Button>
+            <Menu
+              anchorEl={anchorElFinance}
+              open={Boolean(anchorElFinance)}
+              onClose={() => handleFinanceClose()}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem
+                onClick={() => handleFinanceClose("/finance/dashboard")}
+              >
+                Dashboard
+              </MenuItem>
+              <MenuItem onClick={() => handleFinanceClose("/finance/budgets")}>
+                Budgets
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleFinanceClose("/finance/savings-goals")}
+              >
+                Savings Goals
+              </MenuItem>
+              <MenuItem onClick={() => handleFinanceClose("/finance/reports")}>
+                Reports
+              </MenuItem>
+            </Menu>
+
             {user ? (
               <>
                 <IconButton
@@ -122,14 +115,8 @@ export default function NavBar() {
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
                   onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
                 >
                   <MenuItem component={Link} to="/me" onClick={handleClose}>
                     Me
@@ -164,10 +151,6 @@ export default function NavBar() {
           </Box>
         </Toolbar>
       </AppBar>
-
-      <Drawer anchor="right" open={mobileOpen} onClose={toggleDrawer}>
-        {drawer}
-      </Drawer>
     </>
   );
 }
