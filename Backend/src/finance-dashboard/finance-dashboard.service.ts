@@ -96,44 +96,43 @@ export class FinanceDashboardService {
     }[];
   }> {
     const startDate = new Date(currentMonthStart);
-    const currentMonth = startDate.getMonth() + 1; // 1-12
+    const currentMonth = startDate.getMonth() + 1;
     const currentYear = startDate.getFullYear();
 
-    // previous month calculation
+    // Previous month calculation
     const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
     const previousMonthYear =
       currentMonth === 1 ? currentYear - 1 : currentYear;
 
+    // Helper to get month start/end
     const getMonthRange = (year: number, month: number) => ({
-      start: new Date(year, month - 1, 1),
-      end: new Date(year, month, 0, 23, 59, 59, 999), // last day of month
+      start: new Date(year, month - 1, 1, 0, 0, 0, 0),
+      end: new Date(year, month, 0, 23, 59, 59, 999),
     });
 
     const currentRange = getMonthRange(currentYear, currentMonth);
     const prevRange = getMonthRange(previousMonthYear, previousMonth);
 
-    // Fetch transactions for both months
+    // Fetch all transactions in both ranges
     const raw = await this.transactionsRepository
       .createQueryBuilder('transaction')
       .select('transaction.category', 'category')
       .addSelect('transaction.type', 'type')
-      .addSelect('SUM(transaction.amount)', 'total')
-      .addSelect('MONTH(transaction.date)', 'month')
+      .addSelect('transaction.amount', 'amount')
+      .addSelect('transaction.date', 'date') // must include date
       .where('transaction.userId = :userId', { userId: user.id })
       .andWhere('(transaction.date BETWEEN :prevStart AND :currentEnd)', {
         prevStart: prevRange.start,
         currentEnd: currentRange.end,
       })
-      .groupBy('transaction.category')
-      .addGroupBy('transaction.type')
-      .addGroupBy('MONTH(transaction.date)')
       .getRawMany<{
         category: string;
         type: 'income' | 'expense';
-        total: string;
-        month: number;
+        amount: string;
+        date: string; // returned as string from DB
       }>();
 
+    // Initialize totals
     let prevIncome = 0,
       currentIncome = 0,
       prevExpense = 0,
@@ -151,16 +150,22 @@ export class FinanceDashboardService {
     > = {};
 
     raw.forEach((row) => {
-      const total = parseFloat(row.total);
-      const isCurrentMonth = row.month === currentMonth;
+      const total = parseFloat(row.amount);
+      const transactionDate = new Date(row.date);
+
+      const isCurrentMonth =
+        transactionDate >= currentRange.start &&
+        transactionDate <= currentRange.end;
+      const isPreviousMonth =
+        transactionDate >= prevRange.start && transactionDate <= prevRange.end;
 
       // Aggregate overview totals
       if (row.type === 'income') {
         if (isCurrentMonth) currentIncome += total;
-        else prevIncome += total;
+        else if (isPreviousMonth) prevIncome += total;
       } else {
         if (isCurrentMonth) currentExpense += total;
-        else prevExpense += total;
+        else if (isPreviousMonth) prevExpense += total;
       }
 
       // Aggregate per category
@@ -175,9 +180,10 @@ export class FinanceDashboardService {
         };
       }
       if (isCurrentMonth) detailsMap[key].current += total;
-      else detailsMap[key].prev += total;
+      else if (isPreviousMonth) detailsMap[key].prev += total;
     });
 
+    // Percentage calculation
     const calcPercentage = (prev: number, current: number) =>
       prev === 0 ? (current === 0 ? 0 : 100) : ((current - prev) / prev) * 100;
 

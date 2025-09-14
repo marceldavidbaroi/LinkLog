@@ -1,33 +1,41 @@
 import { useEffect, useState } from "react";
 import { startOfMonth, endOfMonth, format } from "date-fns";
-import { useTransactions } from "../hooks/transactionsAuth";
-import { useTransactionsStore } from "../store/transactionsStore";
+import { useDashboard } from "../hooks/dashboardAuth";
+import { useDashboardStore } from "../store/dashboardStore";
 
 import { KpiCards } from "../components/KpiCards";
 import { ViewSelector } from "../components/ViewSelector";
 import { SummaryView } from "../components/SummaryView";
 import { CategorySummaryView } from "../components/CategorySummaryView";
 import { FullCategoriesView } from "../components/FullCategoriesView";
+import MonthlyComparison from "../components/MonthlyComparison";
 
 type ViewType = "summary" | "category" | "full";
 
 const FinanceDashboardIndex = () => {
-  const { overview } = useTransactions();
-  const transactionStore = useTransactionsStore();
+  const { overview, comparison } = useDashboard();
+  const dashboardStore = useDashboardStore();
   const [view, setView] = useState<ViewType>("summary");
 
-  const getSummary = async () => {
+  const getOverview = async () => {
     const now = new Date();
     const startDate = format(startOfMonth(now), "yyyy-MM-dd");
     const endDate = format(endOfMonth(now), "yyyy-MM-dd");
     await overview({ startDate, endDate });
   };
 
+  const getcomparison = async () => {
+    const now = new Date();
+    const startDate = format(startOfMonth(now), "yyyy-MM-dd");
+    await comparison({ startDate });
+  };
+
   useEffect(() => {
-    getSummary();
+    getOverview();
+    getcomparison();
   }, []);
 
-  const data = transactionStore.summary;
+  const data = dashboardStore.overview;
   if (!data)
     return <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>;
 
@@ -70,6 +78,7 @@ const FinanceDashboardIndex = () => {
         Finance Dashboard
       </h1>
       <KpiCards kpis={kpis} />
+      <MonthlyComparison data={dashboardStore.compareMonth ?? null} />
       <ViewSelector view={view} setView={setView} />
       {renderView()}
     </div>

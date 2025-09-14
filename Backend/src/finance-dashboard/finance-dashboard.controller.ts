@@ -53,7 +53,7 @@ export class FinanceDashboardController {
   }
 
   /** New endpoint: compare current month with previous month */
-  @Get('compare-month')
+  @Get('monthly-comparison')
   async compareMonth(
     @GetUser() user: User,
     @Query() query: CompareMonthQueryDto, // expects { startDate: 'yyyy-mm-dd' }
