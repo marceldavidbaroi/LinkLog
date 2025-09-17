@@ -9,6 +9,7 @@ import {
 import { Interactions } from 'src/interactions/interactions.entity';
 import { UserPreferences } from './userPreferences.entity';
 import { Transactions } from 'src/transactions/transactions.entity';
+import { Budgets } from 'src/budgets/budgets.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -45,4 +46,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Transactions, (transaction) => transaction.user)
   transactions: Transactions[];
+
+  @OneToMany(() => Budgets, (budget) => budget.user)
+  budgets: Budgets[];
 }

@@ -8,6 +8,7 @@ import { PeopleModule } from './people/people.module';
 import { InteractionsModule } from './interactions/interactions.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { FinanceDashboardModule } from './finance-dashboard/finance-dashboard.module';
+import { BudgetsModule } from './budgets/budgets.module';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -20,6 +21,7 @@ dotenv.config();
     InteractionsModule,
     TransactionsModule,
     FinanceDashboardModule,
+    BudgetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -32,7 +32,7 @@ export class Transactions {
     type: 'enum',
     enum: [...Object.values(IncomeCategory), ...Object.values(ExpenseCategory)],
   })
-  category: IncomeCategory | TransactionType;
+  category: IncomeCategory | ExpenseCategory;
 
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;

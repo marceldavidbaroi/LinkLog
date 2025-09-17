@@ -8,11 +8,6 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -98,6 +93,11 @@ export default function NavBar() {
               </MenuItem>
               <MenuItem onClick={() => handleFinanceClose("/finance/reports")}>
                 Reports
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleFinanceClose("/finance/transactions")}
+              >
+                Transactions
               </MenuItem>
             </Menu>
 

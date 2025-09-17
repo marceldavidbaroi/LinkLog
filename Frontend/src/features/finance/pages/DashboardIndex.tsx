@@ -9,13 +9,17 @@ import { SummaryView } from "../components/SummaryView";
 import { CategorySummaryView } from "../components/CategorySummaryView";
 import { FullCategoriesView } from "../components/FullCategoriesView";
 import MonthlyComparison from "../components/MonthlyComparison";
+import { useBudgets } from "../hooks/budgetAuth";
+import BudgetAlerts from "../components/BudgetAlerts";
 
 type ViewType = "summary" | "category" | "full";
 
 const FinanceDashboardIndex = () => {
   const { overview, comparison } = useDashboard();
+  const { getAlerts } = useBudgets();
   const dashboardStore = useDashboardStore();
   const [view, setView] = useState<ViewType>("summary");
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   const getOverview = async () => {
     const now = new Date();
@@ -30,9 +34,18 @@ const FinanceDashboardIndex = () => {
     await comparison({ startDate });
   };
 
+  const fetchAlerts = async () => {
+    const query = {
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+    };
+    const alert = await getAlerts(query);
+    setAlerts(alert.data ?? []);
+  };
   useEffect(() => {
     getOverview();
     getcomparison();
+    fetchAlerts();
   }, []);
 
   const data = dashboardStore.overview;
@@ -78,6 +91,7 @@ const FinanceDashboardIndex = () => {
         Finance Dashboard
       </h1>
       <KpiCards kpis={kpis} />
+      {alerts.length > 0 && <BudgetAlerts alerts={alerts} />}
       <MonthlyComparison data={dashboardStore.compareMonth ?? null} />
       <ViewSelector view={view} setView={setView} />
       {renderView()}

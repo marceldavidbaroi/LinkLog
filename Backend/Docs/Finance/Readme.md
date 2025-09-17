@@ -272,14 +272,62 @@ All endpoints require **JWT authentication**.
 
 **Base URL:** `/budgets`
 
-| Method | Endpoint          | Description                                 |
-| ------ | ----------------- | ------------------------------------------- |
-| GET    | `/budgets`        | Get all budgets for the user                |
-| GET    | `/budgets/:id`    | Get a single budget record                  |
-| POST   | `/budgets`        | Create a new budget                         |
-| PUT    | `/budgets/:id`    | Update a budget                             |
-| DELETE | `/budgets/:id`    | Delete a budget                             |
-| GET    | `/budgets/alerts` | Check which budgets are nearing their limit |
+| Endpoint          | Method | Request Body / Query                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `/budgets`        | POST   | `json {   "category": "Food",   "amount": 300.00,   "month": 9,   "year": 2025 }`                                          |
+| `/budgets`        | GET    | Query Params: `category` (enum), `month` (1–12), `year` (number), `page` (number, default 1), `limit` (number, default 25) |
+| `/budgets/:id`    | GET    | -                                                                                                                          |
+| `/budgets/:id`    | PUT    | `json {   "category": "Entertainment",   "amount": 500.00,   "month": 10,   "year": 2025 }`                                |
+| `/budgets/:id`    | DELETE | -                                                                                                                          |
+| `/budgets/alerts` | GET    | Query Params: `threshold` (number, default 0.9 → 90%), `month` (1–12), `year` (number)                                     |
+
+---
+
+### DTOs Overview
+
+### `CreateBudgetDto`
+
+| Field    | Type                     | Required | Notes                              |
+| -------- | ------------------------ | -------- | ---------------------------------- |
+| category | enum (`ExpenseCategory`) | ✅       | Budget category (Food, Rent, etc.) |
+| amount   | decimal (max 2 decimals) | ✅       | Budgeted amount                    |
+| month    | number (1–12)            | ✅       | Budget month                       |
+| year     | number (>=1900)          | ✅       | Budget year                        |
+
+---
+
+### `UpdateBudgetDto`
+
+(Same fields as `CreateBudgetDto`, but all optional)
+
+| Field    | Type                     | Required | Notes                     |
+| -------- | ------------------------ | -------- | ------------------------- |
+| category | enum (`ExpenseCategory`) | ❌       | Update category if needed |
+| amount   | decimal                  | ❌       | Update amount             |
+| month    | number (1–12)            | ❌       | Update month              |
+| year     | number                   | ❌       | Update year               |
+
+---
+
+### `FindBudgetsDto` (Query)
+
+| Field    | Type                     | Default | Optional | Notes                    |
+| -------- | ------------------------ | ------- | -------- | ------------------------ |
+| category | enum (`ExpenseCategory`) | -       | ✅       | Filter by category       |
+| month    | number (1–12)            | -       | ✅       | Filter by month          |
+| year     | number                   | -       | ✅       | Filter by year           |
+| page     | number                   | 1       | ✅       | Pagination page          |
+| limit    | number                   | 25      | ✅       | Items per page (max 100) |
+
+---
+
+### `BudgetAlertsDto` (Query)
+
+| Field     | Type   | Default | Optional | Notes                                         |
+| --------- | ------ | ------- | -------- | --------------------------------------------- |
+| threshold | number | 0.9     | ✅       | Alert if spending ≥ threshold × budget amount |
+| month     | number | -       | ✅       | Limit alerts to a specific month              |
+| year      | number | -       | ✅       | Limit alerts to a specific year               |
 
 ---
 

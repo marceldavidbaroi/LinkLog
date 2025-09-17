@@ -1,5 +1,6 @@
 import MainLayout from "../../layouts/MainLayout";
 import type { AppRouteObject } from "../../types/route.type";
+import BudgetsIndex from "./pages/BudgetIndex";
 import FinanceDashboardIndex from "./pages/DashboardIndex";
 import TransactionsIndex from "./pages/TransactionIndex";
 
@@ -12,6 +13,11 @@ export const FinanceRoutes: AppRouteObject[] = [
   {
     path: "/finance/transactions",
     element: <TransactionsIndex />,
+    layout: MainLayout,
+  },
+  {
+    path: "/finance/budgets",
+    element: <BudgetsIndex />,
     layout: MainLayout,
   },
 ];
