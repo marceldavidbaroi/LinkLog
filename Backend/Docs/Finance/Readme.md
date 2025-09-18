@@ -164,17 +164,17 @@ Tracks monthly budgets per category.
 
 Tracks goals and progress.
 
-| Column Name   | Type       | Description                |
-| ------------- | ---------- | -------------------------- |
-| id            | UUID / int | Primary key                |
-| user_id       | UUID / int | Foreign key → Users        |
-| name          | varchar    | Goal name (e.g., Vacation) |
-| target_amount | decimal    | Amount to save             |
-| saved_amount  | decimal    | Current saved amount       |
-| priority      | int        | Optional priority level    |
-| due_date      | date       | Optional target date       |
-| created_at    | timestamp  | Record creation            |
-| updated_at    | timestamp  | Record update              |
+| Column Name   | Type       | Description                               |
+| ------------- | ---------- | ----------------------------------------- |
+| id            | UUID / int | Primary key                               |
+| user_id       | UUID / int | Foreign key → Users                       |
+| name          | varchar    | Goal name (e.g., Vacation)                |
+| target_amount | decimal    | Amount to save                            |
+| saved_amount  | decimal    | Current saved amount                      |
+| priority      | varchar    | Optional priority level {HIGH,MEDIUM,LOW} |
+| due_date      | date       | Optional target date                      |
+| created_at    | timestamp  | Record creation                           |
+| updated_at    | timestamp  | Record update                             |
 
 ---
 
@@ -335,16 +335,69 @@ All endpoints require **JWT authentication**.
 
 ### 4️⃣ Savings Goals
 
+# Savings Goals API
+
+# Savings Goals API
+
 **Base URL:** `/savings-goals`
 
-| Method | Endpoint                         | Description                                                         |
-| ------ | -------------------------------- | ------------------------------------------------------------------- |
-| GET    | `/savings-goals`                 | List all savings goals                                              |
-| GET    | `/savings-goals/:id`             | Get details of a savings goal                                       |
-| POST   | `/savings-goals`                 | Create a new savings goal                                           |
-| PUT    | `/savings-goals/:id`             | Update a savings goal (progress, target amount, priority, due date) |
-| DELETE | `/savings-goals/:id`             | Delete a savings goal                                               |
-| POST   | `/savings-goals/auto-contribute` | Optional: set up automatic contributions                            |
+| Method | Endpoint                 | Description                                                         | Example Payload                                                                                                                    |
+| ------ | ------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/savings-goals`         | List all savings goals                                              | -                                                                                                                                  |
+| GET    | `/savings-goals/:id`     | Get details of a savings goal                                       | -                                                                                                                                  |
+| POST   | `/savings-goals`         | Create a new savings goal                                           | `json { "name": "Vacation Fund", "target_amount": 2000.00, "saved_amount": 500.00, "priority": "HIGH", "due_date": "2025-12-31" }` |
+| PUT    | `/savings-goals/:id`     | Update a savings goal (progress, target amount, priority, due date) | `json { "target_amount": 2500.00, "priority": "MEDIUM" }`                                                                          |
+| DELETE | `/savings-goals/:id`     | Delete a savings goal                                               | -                                                                                                                                  |
+| PATCH  | `/savings-goals/:id/add` | Add amount to current savings and create a transaction              | `json { "amount": 100.00 }`                                                                                                        |
+
+---
+
+## DTOs Overview
+
+### `CreateSavingsGoalDto`
+
+| Field         | Type   | Required | Notes                             |
+| ------------- | ------ | -------- | --------------------------------- |
+| name          | string | ✅       | Name of the savings goal          |
+| target_amount | number | ✅       | Target amount to save             |
+| saved_amount  | number | ❌       | Current saved amount (default 0)  |
+| priority      | enum   | ❌       | HIGH, MEDIUM, or LOW              |
+| due_date      | string | ❌       | ISO date string for goal deadline |
+
+---
+
+### `UpdateSavingsGoalDto`
+
+(Same fields as `CreateSavingsGoalDto`, all optional)
+
+| Field         | Type   | Required | Notes                       |
+| ------------- | ------ | -------- | --------------------------- |
+| name          | string | ❌       | Update goal name            |
+| target_amount | number | ❌       | Update target amount        |
+| saved_amount  | number | ❌       | Update current saved amount |
+| priority      | enum   | ❌       | Update priority             |
+| due_date      | string | ❌       | Update goal deadline        |
+
+---
+
+### `FindSavingsGoalsDto` (Query Parameters)
+
+| Field    | Type   | Default | Optional | Notes                           |
+| -------- | ------ | ------- | -------- | ------------------------------- |
+| name     | string | -       | ✅       | Filter goals by name            |
+| priority | enum   | -       | ✅       | Filter by HIGH, MEDIUM, or LOW  |
+| month    | number | -       | ✅       | Filter by goal due month (1–12) |
+| year     | number | -       | ✅       | Filter by goal due year         |
+| page     | number | 1       | ✅       | Pagination page                 |
+| limit    | number | 25      | ✅       | Items per page (max 100)        |
+
+---
+
+### `AddToSavingsDto` (Request Body for `PATCH /:id/add`)
+
+| Field  | Type   | Required | Notes                         |
+| ------ | ------ | -------- | ----------------------------- |
+| amount | number | ✅       | Amount to add to saved_amount |
 
 ---
 

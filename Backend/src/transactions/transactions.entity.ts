@@ -13,6 +13,7 @@ import {
   ExpenseCategory,
   RecurringInterval,
 } from './transactions.enum';
+import { SavingsGoals } from 'src/savings-goals/savings-goals.entity';
 
 @Entity('transactions')
 export class Transactions {
@@ -58,4 +59,10 @@ export class Transactions {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @ManyToOne(() => SavingsGoals, (goal) => goal.transactions, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  savingsGoal: SavingsGoals;
 }

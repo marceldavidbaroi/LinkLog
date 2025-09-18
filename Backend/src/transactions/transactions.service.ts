@@ -13,7 +13,6 @@ export class TransactionsService {
     @InjectRepository(Transactions)
     private transactionsRepository: Repository<Transactions>,
   ) {}
-
   /** Create a new transaction */
   async create(
     createTransactionDto: CreateTransactionDto,
@@ -23,11 +22,14 @@ export class TransactionsService {
       type: createTransactionDto.type,
       category: createTransactionDto.category,
       amount: createTransactionDto.amount,
-      date: new Date(createTransactionDto.date), // convert string -> Date
+      date: new Date(createTransactionDto.date),
       description: createTransactionDto.description,
       recurring: createTransactionDto.recurring ?? false,
       recurring_interval: createTransactionDto.recurring_interval,
-      user: { id: user.id }, // only pass the relation ID
+      user: { id: user.id }, // relation to user
+      savingsGoal: createTransactionDto.savingsGoalId
+        ? { id: createTransactionDto.savingsGoalId } // ⚡ link savings goal
+        : null,
     } as Partial<Transactions>);
 
     return this.transactionsRepository.save(transaction);

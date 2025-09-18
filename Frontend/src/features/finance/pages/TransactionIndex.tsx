@@ -67,8 +67,9 @@ const TransactionsIndex = () => {
   };
 
   const handleEdit = async (id: number) => {
-    await getById(id);
-    setEditingTransaction(transactionStore.transaction); // editing existing
+    const transaction = await getById(id);
+    if (!transaction) return;
+    setEditingTransaction(transaction);
     setDialogFormOpen(true);
   };
 
@@ -79,6 +80,7 @@ const TransactionsIndex = () => {
     } else {
       await create(data);
     }
+    setEditingTransaction(null); // null = creating new
   };
 
   const handleDelete = (id: number) => {
@@ -343,7 +345,10 @@ const TransactionsIndex = () => {
       />
       <TransactionFormDialog
         open={dialogFormOpen}
-        onClose={() => setDialogFormOpen(false)}
+        onClose={() => {
+          setEditingTransaction(null);
+          setDialogFormOpen(false);
+        }}
         onSubmit={handleSubmit}
         transaction={editingTransaction}
       />

@@ -45,4 +45,9 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsEnum(RecurringInterval, { message: 'Invalid recurring interval' })
   recurring_interval?: RecurringInterval;
+
+  /** Optional: link this transaction to a savings goal */
+  @IsOptional()
+  @IsNumber({}, { message: 'savingsGoalId must be a number' })
+  savingsGoalId?: number;
 }

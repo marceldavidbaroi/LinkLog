@@ -54,6 +54,7 @@ export const useTransactions = () => {
     try {
       const { data }: ApiResponse<Transaction> = await Api.getOne(id);
       setTransaction(data || null);
+      return data;
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
     } finally {
