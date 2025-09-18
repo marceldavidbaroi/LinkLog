@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import { User } from '../auth/user.entity';
 import {
@@ -16,11 +17,15 @@ import {
 import { SavingsGoals } from 'src/savings-goals/savings-goals.entity';
 
 @Entity('transactions')
+@Index('idx_user_date', ['user', 'date']) // For monthly/period queries
+@Index('idx_user_category_date', ['user', 'category', 'date']) // For category reports per period
+@Index('idx_user_recurring', ['user', 'recurring']) // For fetching recurring txns by user
 export class Transactions {
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
+  @Index() // Explicit index on user_id (foreign key)
   user: User;
 
   @Column({
@@ -64,5 +69,6 @@ export class Transactions {
     nullable: true,
     onDelete: 'SET NULL',
   })
+  @Index() // Explicit index on savings_goal_id (foreign key)
   savingsGoal: SavingsGoals;
 }

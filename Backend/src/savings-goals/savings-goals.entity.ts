@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 
 export enum Priority {
@@ -16,6 +17,10 @@ export enum Priority {
   LOW = 'LOW',
 }
 
+@Entity('savings_goals')
+@Index('idx_savings_user', ['user'])
+@Index('idx_savings_user_priority', ['user', 'priority'])
+@Index('idx_savings_user_due_date', ['user', 'due_date'])
 @Entity('savings_goals')
 export class SavingsGoals {
   @PrimaryGeneratedColumn()

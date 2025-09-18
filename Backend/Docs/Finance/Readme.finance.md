@@ -199,6 +199,7 @@ Stores cached reports for faster PDF export or analytics.
 - **Users → Transactions** = 1:N
 - **Users → Budgets** = 1:N
 - **Users → Savings Goals** = 1:N
+- **Savings Goals → Transactions** = 1:N
 - **Users → Reports** = 1:N
 
 ---
