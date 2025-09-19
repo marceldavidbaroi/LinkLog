@@ -39,7 +39,7 @@ export class ReportsService {
 
     // Filter by report type
     if (filters?.reportType) {
-      query.andWhere('report.report_type = :reportType', {
+      query.andWhere('report.reportType = :reportType', {
         reportType: filters.reportType,
       });
     }
@@ -72,7 +72,7 @@ export class ReportsService {
     }
 
     // Order by start date descending
-    return query.orderBy('report.period_start', 'DESC').getMany();
+    return query.orderBy('report.periodStart', 'DESC').getMany();
   }
 
   /** Find one report */
@@ -241,7 +241,7 @@ export class ReportsService {
 
     // --- Calculate savedAmount for savings goals ---
     savingsGoals.forEach((g) => {
-      g.saved_amount =
+      g.savedAmount =
         g.transactions
           ?.filter(
             (t) =>
@@ -262,12 +262,12 @@ export class ReportsService {
         budgetDifference: overallBudgeted - overallSpent,
         savingsProgress: savingsGoals[0]
           ? {
-              targetAmount: Number(savingsGoals[0].target_amount ?? 0),
-              savedAmount: Number(savingsGoals[0].saved_amount ?? 0),
-              percentage: savingsGoals[0].target_amount
+              targetAmount: Number(savingsGoals[0].targetAmount ?? 0),
+              savedAmount: Number(savingsGoals[0].savedAmount ?? 0),
+              percentage: savingsGoals[0].targetAmount
                 ? +(
-                    (Number(savingsGoals[0].saved_amount ?? 0) /
-                      Number(savingsGoals[0].target_amount)) *
+                    (Number(savingsGoals[0].savedAmount ?? 0) /
+                      Number(savingsGoals[0].targetAmount)) *
                     100
                   ).toFixed(2)
                 : 0,
@@ -287,9 +287,9 @@ export class ReportsService {
         },
       },
       savingsGoals: savingsGoals.map((g) => {
-        const dueDate = g.due_date ? new Date(g.due_date) : null;
-        const saved = Number(g.saved_amount ?? 0);
-        const target = Number(g.target_amount ?? 0);
+        const dueDate = g.dueDate ? new Date(g.dueDate) : null;
+        const saved = Number(g.savedAmount ?? 0);
+        const target = Number(g.targetAmount ?? 0);
         let status: 'inProgress' | 'completed' | 'overdue' = 'inProgress';
         if (saved >= target && target > 0) status = 'completed';
         else if (dueDate && dueDate < new Date()) status = 'overdue';
@@ -431,7 +431,7 @@ export class ReportsService {
 
     // Savings goals
     savingsGoals.forEach((g) => {
-      g.saved_amount =
+      g.savedAmount =
         g.transactions
           ?.filter(
             (t) =>
@@ -451,10 +451,10 @@ export class ReportsService {
         budgetDifference: overallBudgeted - overallSpent,
         savingsProgress: savingsGoals[0]
           ? {
-              targetAmount: savingsGoals[0].target_amount,
-              savedAmount: savingsGoals[0].saved_amount,
+              targetAmount: savingsGoals[0].targetAmount,
+              savedAmount: savingsGoals[0].savedAmount,
               percentage: +(
-                (savingsGoals[0].saved_amount / savingsGoals[0].target_amount) *
+                (savingsGoals[0].savedAmount / savingsGoals[0].targetAmount) *
                 100
               ).toFixed(2),
             }
@@ -473,16 +473,16 @@ export class ReportsService {
         },
       },
       savingsGoals: savingsGoals.map((g) => {
-        const dueDate = new Date(g.due_date);
+        const dueDate = new Date(g.dueDate);
         let status: 'inProgress' | 'completed' | 'overdue' = 'inProgress';
-        if (g.saved_amount >= g.target_amount) status = 'completed';
+        if (g.savedAmount >= g.targetAmount) status = 'completed';
         else if (dueDate < new Date()) status = 'overdue';
 
         return {
           goalName: g.name,
-          targetAmount: g.target_amount,
-          savedAmount: g.saved_amount,
-          percentage: +((g.saved_amount / g.target_amount) * 100).toFixed(2),
+          targetAmount: g.targetAmount,
+          savedAmount: g.savedAmount,
+          percentage: +((g.savedAmount / g.targetAmount) * 100).toFixed(2),
           dueDate: dueDate.toISOString().split('T')[0],
           status,
         };

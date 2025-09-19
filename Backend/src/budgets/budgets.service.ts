@@ -63,7 +63,7 @@ export class BudgetsService {
     }
 
     const [data, total] = await query
-      .orderBy('budget.updated_at', 'DESC')
+      .orderBy('budget.updatedAt', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();

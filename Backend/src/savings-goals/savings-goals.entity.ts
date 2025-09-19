@@ -20,8 +20,7 @@ export enum Priority {
 @Entity('savings_goals')
 @Index('idx_savings_user', ['user'])
 @Index('idx_savings_user_priority', ['user', 'priority'])
-@Index('idx_savings_user_due_date', ['user', 'due_date'])
-@Entity('savings_goals')
+@Index('idx_savings_user_due_date', ['user', 'dueDate'])
 export class SavingsGoals {
   @PrimaryGeneratedColumn()
   id: number;

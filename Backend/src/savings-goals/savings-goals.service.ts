@@ -71,7 +71,7 @@ export class SavingsGoalsService {
     }
 
     const [data, total] = await query
-      .orderBy('goal.updated_at', 'DESC')
+      .orderBy('goal.updatedAt', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();

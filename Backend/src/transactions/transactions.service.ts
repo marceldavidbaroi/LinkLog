@@ -76,7 +76,7 @@ export class TransactionsService {
     }
 
     const [data, total] = await query
-      .orderBy('transaction.updated_at', 'DESC')
+      .orderBy('transaction.updatedAt', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();

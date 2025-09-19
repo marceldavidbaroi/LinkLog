@@ -114,7 +114,7 @@ export class InteractionsService {
         .addOrderBy('person.lastname', sortOptions.sortByPersonName);
     }
     if (sortOptions?.sortByUpdatedAt) {
-      query.addOrderBy('interaction.updated_at', sortOptions.sortByUpdatedAt);
+      query.addOrderBy('interaction.updatedAt', sortOptions.sortByUpdatedAt);
     }
 
     // Pagination
