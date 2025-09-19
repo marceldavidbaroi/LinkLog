@@ -25,7 +25,7 @@ export class TransactionsService {
       date: new Date(createTransactionDto.date),
       description: createTransactionDto.description,
       recurring: createTransactionDto.recurring ?? false,
-      recurring_interval: createTransactionDto.recurring_interval,
+      recurringInterval: createTransactionDto.recurringInterval,
       user: { id: user.id }, // relation to user
       savingsGoal: createTransactionDto.savingsGoalId
         ? { id: createTransactionDto.savingsGoalId } // ⚡ link savings goal

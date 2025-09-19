@@ -56,14 +56,15 @@ export class Transactions {
     type: 'enum',
     enum: RecurringInterval,
     nullable: true,
+    name: 'recurring_interval',
   })
-  recurring_interval?: RecurringInterval;
+  recurringInterval?: RecurringInterval;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
   @ManyToOne(() => SavingsGoals, (goal) => goal.transactions, {
     nullable: true,
