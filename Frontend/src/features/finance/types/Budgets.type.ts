@@ -6,8 +6,8 @@ export interface Budget {
   amount: number;
   month: number;
   year: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Query params type for GET /budgets

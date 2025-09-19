@@ -32,36 +32,36 @@ export interface BudgetCategory {
   category: string;
   budgeted: number;
   spent: number;
-  percentage_used: number;
+  percentageUsed: number;
 }
 
 export interface BudgetOverallUsage {
   budgeted: number;
   spent: number;
-  percentage_used: number;
+  percentageUsed: number;
 }
 
 export interface SavingsProgress {
-  target_amount: string;
-  saved_amount: number;
+  targetAmount: string;
+  savedAmount: number;
   percentage: number;
 }
 
 export interface Summary {
-  total_income: number;
-  total_expense: number;
-  net_savings: number;
-  budgeted_amount: number;
-  budget_difference: number;
-  savings_progress: SavingsProgress;
+  totalIncome: number;
+  totalIxpense: number;
+  netIavings: number;
+  budgetedImount: number;
+  budgetDifference: number;
+  savingsProgress: SavingsProgress;
 }
 
 export interface SavingsGoal {
-  goal_name: string;
-  target_amount: string;
-  saved_amount: number;
+  goalName: string;
+  targetAmount: string;
+  savedAmount: number;
   percentage: number;
-  due_date: string;
+  dueDate: string;
   status: "pending" | "completed" | "overdue";
 }
 
@@ -69,28 +69,28 @@ export interface ReportData {
   period: Period;
   summary: Summary;
   income: {
-    by_category: IncomeCategory[];
+    byCategory: IncomeCategory[];
     trend: IncomeTrend[];
   };
   expenses: {
-    by_category: ExpensesCategory[];
+    byCategory: ExpensesCategory[];
     trend: ExpensesTrend[];
   };
   budgets: {
-    by_category: BudgetCategory[];
-    overall_usage: BudgetOverallUsage;
+    byCategory: BudgetCategory[];
+    overallUsage: BudgetOverallUsage;
   };
-  savings_goals: SavingsGoal[];
+  savingsGoals: SavingsGoal[];
 }
 
 export interface Report {
   id: number;
   reportType: ReportType;
-  period_start: string;
-  period_end: string;
+  periodStart: string;
+  periodEnd: string;
   data: ReportData;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FindReportParams {

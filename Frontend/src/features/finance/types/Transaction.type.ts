@@ -6,9 +6,9 @@ export interface Transaction {
   date: string | null;
   description?: string;
   recurring?: boolean;
-  recurring_interval?: RecurringInterval | null;
-  created_at: string;
-  updated_at: string;
+  recurringInterval?: RecurringInterval | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type TransactionType = "income" | "expense";

@@ -4,13 +4,13 @@ export type Priority = "HIGH" | "MEDIUM" | "LOW";
 export interface SavingsGoal {
   id: number;
   name: string;
-  target_amount: string;
-  saved_amount: string | null;
+  targetAmount: string;
+  savedAmount: string | null;
   priority: Priority;
   transactions: Partial<Transaction>[] | null;
-  due_date: string;
-  created_at: string;
-  updated_at: string;
+  dueDate: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FindSavingsGoalsParams {
