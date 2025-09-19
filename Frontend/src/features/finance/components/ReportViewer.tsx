@@ -14,11 +14,11 @@ import {
 } from "@mui/material";
 
 type ReportProps = {
-  report: any; // ideally define a proper TypeScript interface
+  report: any; // ideally replace with a proper TypeScript interface
 };
 
 const ReportViewer: React.FC<ReportProps> = ({ report }) => {
-  const data = report.data;
+  const data = report?.data ?? {};
 
   return (
     <Box sx={{ p: 2 }}>
@@ -26,10 +26,10 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Typography variant="h5" fontWeight="bold">
-            {report?.report_type?.toUpperCase()} Report
+            {report?.reportType?.toUpperCase() ?? "REPORT"}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {data.period.start} → {data.period.end}
+            {data.period?.start ?? "-"} → {data.period?.end ?? "-"}
           </Typography>
         </CardContent>
       </Card>
@@ -44,31 +44,32 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
             <Grid item xs={6} md={3}>
               <Typography>Total Income</Typography>
               <Typography fontWeight="bold">
-                ${data.summary.total_income}
+                ${data.summary?.totalIncome ?? 0}
               </Typography>
             </Grid>
             <Grid item xs={6} md={3}>
               <Typography>Total Expense</Typography>
               <Typography fontWeight="bold">
-                ${data.summary.total_expense}
+                ${data.summary?.totalExpense ?? 0}
               </Typography>
             </Grid>
             <Grid item xs={6} md={3}>
               <Typography>Net Savings</Typography>
               <Typography fontWeight="bold">
-                ${data.summary.net_savings}
+                ${data.summary?.netSavings ?? 0}
               </Typography>
             </Grid>
             <Grid item xs={6} md={3}>
               <Typography>Budgeted</Typography>
               <Typography fontWeight="bold">
-                ${data.summary.budgeted_amount}
+                ${data.summary?.budgetedAmount ?? 0}
               </Typography>
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <Typography>
-            Savings Goal Progress: {data.summary?.savings_progress?.percentage}%
+            Savings Goal Progress:{" "}
+            {data.summary?.savingsProgress?.percentage ?? 0}%
           </Typography>
         </CardContent>
       </Card>
@@ -88,13 +89,19 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.income.by_category.map((item: any, idx: number) => (
+              {data.income?.byCategory?.map((item: any, idx: number) => (
                 <TableRow key={idx}>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell>${item.amount}</TableCell>
-                  <TableCell>{item.percentage}%</TableCell>
+                  <TableCell>{item.category ?? "-"}</TableCell>
+                  <TableCell>${item.amount ?? 0}</TableCell>
+                  <TableCell>{item.percentage ?? 0}%</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No income data
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -115,13 +122,19 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.expenses.by_category.map((item: any, idx: number) => (
+              {data.expenses?.byCategory?.map((item: any, idx: number) => (
                 <TableRow key={idx}>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell>${item.amount}</TableCell>
-                  <TableCell>{item.percentage}%</TableCell>
+                  <TableCell>{item.category ?? "-"}</TableCell>
+                  <TableCell>${item.amount ?? 0}</TableCell>
+                  <TableCell>{item.percentage ?? 0}%</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No expense data
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -143,19 +156,26 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.budgets.by_category.map((item: any, idx: number) => (
+              {data.budgets?.byCategory?.map((item: any, idx: number) => (
                 <TableRow key={idx}>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell>${item.budgeted}</TableCell>
-                  <TableCell>${item.spent}</TableCell>
-                  <TableCell>{item.percentage_used}%</TableCell>
+                  <TableCell>{item.category ?? "-"}</TableCell>
+                  <TableCell>${item.budgeted ?? 0}</TableCell>
+                  <TableCell>${item.spent ?? 0}</TableCell>
+                  <TableCell>{item.percentageUsed ?? 0}%</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    No budget data
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
           <Divider sx={{ my: 2 }} />
           <Typography>
-            Overall Budget Usage: {data.budgets.overall_usage.percentage_used}%
+            Overall Budget Usage:{" "}
+            {data.budgets?.overallUsage?.percentageUsed ?? 0}%
           </Typography>
         </CardContent>
       </Card>
@@ -178,16 +198,22 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.savings_goals.map((goal: any, idx: number) => (
+              {data.savingsGoals?.map((goal: any, idx: number) => (
                 <TableRow key={idx}>
-                  <TableCell>{goal.goal_name}</TableCell>
-                  <TableCell>{goal.status}</TableCell>
-                  <TableCell>${goal.saved_amount}</TableCell>
-                  <TableCell>${goal.target_amount}</TableCell>
-                  <TableCell>{goal.percentage}%</TableCell>
-                  <TableCell>{goal.due_date}</TableCell>
+                  <TableCell>{goal.goalName ?? "-"}</TableCell>
+                  <TableCell>{goal.status ?? "-"}</TableCell>
+                  <TableCell>${goal.saved_amount ?? 0}</TableCell>
+                  <TableCell>${goal.target_amount ?? 0}</TableCell>
+                  <TableCell>{goal.percentage ?? 0}%</TableCell>
+                  <TableCell>{goal.due_date ?? "-"}</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    No savings goals
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

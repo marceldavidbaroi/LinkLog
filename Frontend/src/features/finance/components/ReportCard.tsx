@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 
 type ReportCardProps = {
@@ -12,6 +12,17 @@ const ReportCard: React.FC<ReportCardProps> = ({
   onGenerate,
   onSelect,
 }) => {
+  const [visible, setVisible] = useState(true); // state to hide the generate card
+
+  // Handle click on "No report available"
+  const handleGenerateClick = () => {
+    setVisible(false); // hide the card
+    onGenerate?.(); // call passed function
+  };
+
+  // If no report and the generate card has been hidden
+  if (!report && !visible) return null;
+
   if (!report) {
     return (
       <Card
@@ -21,7 +32,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
           cursor: "pointer",
           "&:hover": { boxShadow: 4 },
         }}
-        onClick={onGenerate}
+        onClick={handleGenerateClick}
       >
         <CardContent sx={{ p: 1 }}>
           <Typography variant="body2" gutterBottom>
