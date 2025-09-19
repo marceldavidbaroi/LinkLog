@@ -27,63 +27,52 @@ export class ReportsService {
   async findAll(
     user: User,
     filters?: {
-      month?: number; // 1-12, only for monthly
-      year?: number; // full year
+      month?: number;
+      year?: number;
       reportType?: ReportType;
-      half?: 1 | 2; // 1 = Jan–Jun, 2 = Jul–Dec, only for half-yearly
+      half?: 1 | 2;
     },
   ): Promise<Reports[]> {
     const query = this.reportsRepository
       .createQueryBuilder('report')
       .where('report.userId = :userId', { userId: user.id });
 
+    // Filter by report type
     if (filters?.reportType) {
-      query.andWhere('report.reportType = :reportType', {
+      query.andWhere('report.report_type = :reportType', {
         reportType: filters.reportType,
       });
+    }
 
-      if (filters.reportType === ReportType.MONTHLY) {
-        if (filters.year) {
-          query.andWhere('EXTRACT(YEAR FROM report.periodStart) = :year', {
-            year: filters.year,
-          });
-        }
-        if (filters.month) {
-          query.andWhere('EXTRACT(MONTH FROM report.periodStart) = :month', {
-            month: filters.month,
-          });
-        }
-      }
+    // Filter by year
+    if (filters?.year) {
+      query.andWhere(`EXTRACT(YEAR FROM report.period_start)::int = :year`, {
+        year: filters.year,
+      });
+    }
 
-      if (filters.reportType === ReportType.HALF_YEARLY) {
-        if (filters.year) {
-          query.andWhere('EXTRACT(YEAR FROM report.periodStart) = :year', {
-            year: filters.year,
-          });
-        }
-        if (filters.half) {
-          if (filters.half === 1) {
-            query.andWhere(
-              'EXTRACT(MONTH FROM report.periodStart) BETWEEN 1 AND 6',
-            );
-          } else {
-            query.andWhere(
-              'EXTRACT(MONTH FROM report.periodStart) BETWEEN 7 AND 12',
-            );
-          }
-        }
-      }
+    // Filter by month (only for monthly reports or half-yearly)
+    if (filters?.month && filters.reportType === ReportType.MONTHLY) {
+      query.andWhere(`EXTRACT(MONTH FROM report.period_start)::int = :month`, {
+        month: filters.month,
+      });
+    }
 
-      if (filters.reportType === ReportType.YEARLY) {
-        if (filters.year) {
-          query.andWhere('EXTRACT(YEAR FROM report.periodStart) = :year', {
-            year: filters.year,
-          });
-        }
+    // Filter by half-year (only for half-yearly reports)
+    if (filters?.half && filters.reportType === ReportType.HALF_YEARLY) {
+      if (filters.half === 1) {
+        query.andWhere(
+          'EXTRACT(MONTH FROM report.period_start) BETWEEN 1 AND 6',
+        );
+      } else {
+        query.andWhere(
+          'EXTRACT(MONTH FROM report.period_start) BETWEEN 7 AND 12',
+        );
       }
     }
 
-    return query.orderBy('report.periodStart', 'DESC').getMany();
+    // Order by start date descending
+    return query.orderBy('report.period_start', 'DESC').getMany();
   }
 
   /** Find one report */
@@ -117,29 +106,39 @@ export class ReportsService {
   ): Promise<Reports> {
     const now = new Date();
     const targetYear = year ?? now.getFullYear();
-    let start: Date;
-    let end: Date;
+
+    // --- Generate safe YYYY-MM-DD start and end strings ---
+    let startStr: string;
+    let endStr: string;
 
     if (reportType === ReportType.MONTHLY) {
       if (!month) throw new Error('Month is required for monthly reports');
-      const targetMonth = month - 1; // JS months are 0-based
-      start = new Date(targetYear, targetMonth, 1);
-      end = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59);
+      const mm = month.toString().padStart(2, '0');
+      startStr = `${targetYear}-${mm}-01`;
+      const lastDay = new Date(targetYear, month, 0).getDate(); // last day of month
+      endStr = `${targetYear}-${mm}-${lastDay}`;
     } else if (reportType === ReportType.HALF_YEARLY) {
-      const halfValue = half ?? 1; // default to first half
-      const startMonth = halfValue === 1 ? 0 : 6; // Jan or Jul
-      start = new Date(targetYear, startMonth, 1);
-      end = new Date(targetYear, startMonth + 6, 0, 23, 59, 59); // Jun 30 or Dec 31
+      const halfValue = half ?? 1;
+      const startMonth = halfValue === 1 ? 1 : 7;
+      const endMonth = halfValue === 1 ? 6 : 12;
+      const startMonthStr = startMonth.toString().padStart(2, '0');
+      const endMonthStr = endMonth.toString().padStart(2, '0');
+      startStr = `${targetYear}-${startMonthStr}-01`;
+      const lastDay = new Date(targetYear, endMonth, 0).getDate();
+      endStr = `${targetYear}-${endMonthStr}-${lastDay}`;
     } else {
       // YEARLY
-      start = new Date(targetYear, 0, 1);
-      end = new Date(targetYear, 12, 0, 23, 59, 59); // Dec 31
+      startStr = `${targetYear}-01-01`;
+      endStr = `${targetYear}-12-31`;
     }
+    console.log('this is it ', startStr);
+    // --- Fetch transactions within period ---
+    const transactions = await this.getTransactions(
+      user,
+      new Date(startStr),
+      new Date(endStr),
+    );
 
-    // Fetch transactions
-    const transactions = await this.getTransactions(user, start, end);
-
-    // --- SUMMARY ---
     const totalIncome = transactions
       .filter((t) => t.type === TransactionType.INCOME)
       .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -148,7 +147,7 @@ export class ReportsService {
       .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // --- Fetch budgets and savings goals ---
+    // --- Fetch budgets & savings goals ---
     const { data: budgets } = await this.budgetsService.findAll(user, {
       month,
       year: targetYear,
@@ -166,14 +165,16 @@ export class ReportsService {
       },
     );
 
-    // --- Income / Expense by category ---
+    // --- Group by category ---
     const groupByCategory = (items: any[], type: TransactionType) => {
       const grouped: Record<string, number> = {};
       items
         .filter((t) => t.type === type)
-        .forEach((t) => {
-          grouped[t.category] = (grouped[t.category] ?? 0) + Number(t.amount);
-        });
+        .forEach(
+          (t) =>
+            (grouped[t.category] =
+              (grouped[t.category] ?? 0) + Number(t.amount)),
+        );
       return Object.entries(grouped).map(([category, amount]) => ({
         category,
         amount,
@@ -194,7 +195,7 @@ export class ReportsService {
       TransactionType.EXPENSE,
     );
 
-    // --- Trends ---
+    // --- Group by period (trend) ---
     const groupByPeriod = (items: any[], type: TransactionType) => {
       const grouped: Record<string, number> = {};
       items
@@ -202,7 +203,7 @@ export class ReportsService {
         .forEach((t) => {
           const periodKey =
             reportType === ReportType.MONTHLY
-              ? new Date(t.date).toISOString().split('T')[0]
+              ? t.date // already safe YYYY-MM-DD
               : `${new Date(t.date).getMonth() + 1}-${new Date(t.date).getFullYear()}`;
           grouped[periodKey] = (grouped[periodKey] ?? 0) + Number(t.amount);
         });
@@ -220,7 +221,6 @@ export class ReportsService {
       const spent = transactions
         .filter((t) => t.category === b.category)
         .reduce((sum, t) => sum + Number(t.amount), 0);
-
       return {
         category: b.category,
         budgeted: Number(b.amount),
@@ -239,7 +239,7 @@ export class ReportsService {
       .filter((t) => budgets.some((b) => b.category === t.category))
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // --- Calculate savedAmount for savings goals safely ---
+    // --- Calculate savedAmount for savings goals ---
     savingsGoals.forEach((g) => {
       g.saved_amount =
         g.transactions
@@ -251,12 +251,9 @@ export class ReportsService {
           .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
     });
 
+    // --- Assemble report data ---
     const reportData = {
-      period: {
-        type: reportType,
-        start: start.toISOString().split('T')[0],
-        end: end.toISOString().split('T')[0],
-      },
+      period: { type: reportType, start: startStr, end: endStr },
       summary: {
         totalIncome,
         totalExpense,
@@ -265,14 +262,17 @@ export class ReportsService {
         budgetDifference: overallBudgeted - overallSpent,
         savingsProgress: savingsGoals[0]
           ? {
-              targetAmount: savingsGoals[0].target_amount,
-              savedAmount: savingsGoals[0].saved_amount,
-              percentage: +(
-                (savingsGoals[0].saved_amount / savingsGoals[0].target_amount) *
-                100
-              ).toFixed(2),
+              targetAmount: Number(savingsGoals[0].target_amount ?? 0),
+              savedAmount: Number(savingsGoals[0].saved_amount ?? 0),
+              percentage: savingsGoals[0].target_amount
+                ? +(
+                    (Number(savingsGoals[0].saved_amount ?? 0) /
+                      Number(savingsGoals[0].target_amount)) *
+                    100
+                  ).toFixed(2)
+                : 0,
             }
-          : {},
+          : null,
       },
       income: { byCategory: incomeByCategory, trend: incomeTrend },
       expenses: { byCategory: expensesByCategory, trend: expenseTrend },
@@ -281,34 +281,34 @@ export class ReportsService {
         overallUsage: {
           budgeted: overallBudgeted,
           spent: overallSpent,
-          percentageUsed: +(overallBudgeted
-            ? ((overallSpent / overallBudgeted) * 100).toFixed(2)
-            : 0),
+          percentageUsed: overallBudgeted
+            ? +((overallSpent / overallBudgeted) * 100).toFixed(2)
+            : 0,
         },
       },
       savingsGoals: savingsGoals.map((g) => {
         const dueDate = g.due_date ? new Date(g.due_date) : null;
+        const saved = Number(g.saved_amount ?? 0);
+        const target = Number(g.target_amount ?? 0);
         let status: 'inProgress' | 'completed' | 'overdue' = 'inProgress';
-        if (g.saved_amount >= g.target_amount) status = 'completed';
+        if (saved >= target && target > 0) status = 'completed';
         else if (dueDate && dueDate < new Date()) status = 'overdue';
-
         return {
-          goalName: g.name,
-          targetAmount: g.target_amount,
-          savedAmount: g.saved_amount,
-          percentage: g.target_amount
-            ? +((g.saved_amount / g.target_amount) * 100).toFixed(2)
-            : 0,
+          goalName: g.name ?? 'Unnamed Goal',
+          targetAmount: target,
+          savedAmount: saved,
+          percentage: target ? +((saved / target) * 100).toFixed(2) : 0,
           dueDate: dueDate ? dueDate.toISOString().split('T')[0] : null,
           status,
         };
       }),
     };
 
+    // --- Save report ---
     const report = this.reportsRepository.create({
       reportType,
-      periodStart: start.toISOString().split('T')[0],
-      periodEnd: end.toISOString().split('T')[0],
+      periodStart: startStr,
+      periodEnd: endStr,
       data: reportData,
       user,
     });

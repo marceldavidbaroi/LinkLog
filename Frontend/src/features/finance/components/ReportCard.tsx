@@ -14,7 +14,6 @@ const ReportCard: React.FC<ReportCardProps> = ({
 }) => {
   const [visible, setVisible] = useState(true); // state to hide the generate card
 
-  // Handle click on "No report available"
   const handleGenerateClick = () => {
     setVisible(false); // hide the card
     onGenerate?.(); // call passed function
@@ -50,6 +49,15 @@ const ReportCard: React.FC<ReportCardProps> = ({
     );
   }
 
+  // Safety checks for report fields
+  const id = report?.id ?? 0;
+  const reportType = report?.reportType?.toUpperCase() ?? "UNKNOWN";
+  const periodStart = report?.periodStart ?? "N/A";
+  const periodEnd = report?.periodEnd ?? "N/A";
+  const updatedAt = report?.updatedAt
+    ? new Date(report.updatedAt).toLocaleDateString()
+    : "N/A";
+
   return (
     <Card
       sx={{
@@ -57,23 +65,22 @@ const ReportCard: React.FC<ReportCardProps> = ({
         cursor: "pointer",
         "&:hover": { boxShadow: 4, bgcolor: "grey.50" },
       }}
-      onClick={() => onSelect?.(report.id)}
+      onClick={() => onSelect?.(id)}
     >
       <CardContent sx={{ p: 1 }}>
         <Typography variant="subtitle1" fontWeight="bold">
-          {report.report_type.toUpperCase()} Report
+          {reportType} Report
         </Typography>
 
         <Box>
           <Typography variant="caption" color="text.secondary" display="block">
-            Start: <strong>{report.period_start}</strong>
+            Start: <strong>{periodStart}</strong>
           </Typography>
           <Typography variant="caption" color="text.secondary" display="block">
-            End: <strong>{report.period_end}</strong>
+            End: <strong>{periodEnd}</strong>
           </Typography>
           <Typography variant="caption" color="text.secondary" display="block">
-            Updated:{" "}
-            <strong>{new Date(report.updated_at).toLocaleDateString()}</strong>
+            Updated: <strong>{updatedAt}</strong>
           </Typography>
         </Box>
       </CardContent>
