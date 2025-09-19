@@ -27,8 +27,12 @@ export class User extends BaseEntity {
   @Column()
   password: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'created_at',
+  })
+  createdAt: Date;
 
   @Column({ nullable: true })
   refreshToken?: string;
@@ -37,8 +41,9 @@ export class User extends BaseEntity {
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
+    name: 'updated_at',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToMany(() => Interactions, (interaction) => interaction.user)
   interactions: Interactions[];
@@ -52,8 +57,8 @@ export class User extends BaseEntity {
   @OneToMany(() => Budgets, (budget) => budget.user)
   budgets: Budgets[];
 
-  @OneToMany(() => SavingsGoals, (savings_goal) => savings_goal.user)
-  savings_goals: SavingsGoals[];
+  @OneToMany(() => SavingsGoals, (savingsGoal) => savingsGoal.user)
+  savingsGoals: SavingsGoals[];
 
   @OneToMany(() => Reports, (report) => report.user)
   reports: Reports[];
