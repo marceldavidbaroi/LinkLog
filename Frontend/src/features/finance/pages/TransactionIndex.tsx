@@ -293,7 +293,7 @@ const TransactionsIndex = () => {
                 <TableCell>{row.category}</TableCell>
                 <TableCell>{row.description}</TableCell>
                 <TableCell>{row.recurring ? "Yes" : "No"}</TableCell>
-                <TableCell>{row.recurring_interval}</TableCell>
+                <TableCell>{row.recurringInterval}</TableCell>
                 <TableCell
                   sx={{
                     color:

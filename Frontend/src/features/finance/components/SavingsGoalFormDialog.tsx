@@ -21,15 +21,15 @@ interface SavingsGoalFormDialogProps {
   onClose: () => void;
   onSave: (data: {
     name: string;
-    target_amount: number;
+    targetAmount: number;
     priority: Priority;
-    due_date: string;
+    dueDate: string;
   }) => void;
   initialData?: {
     name?: string;
-    target_amount?: number;
+    targetAmount?: number;
     priority?: Priority;
-    due_date?: string; // YYYY-MM-DD
+    dueDate?: string; // YYYY-MM-DD
   };
 }
 
@@ -42,30 +42,30 @@ const SavingsGoalFormDialog: React.FC<SavingsGoalFormDialogProps> = ({
   // Ensure all initial values are defined
   const [name, setName] = useState(initialData.name || "");
   const [targetAmount, setTargetAmount] = useState<number>(
-    initialData.target_amount ?? 0
+    initialData.targetAmount ?? 0
   );
   const [priority, setPriority] = useState<Priority>(
     initialData.priority || "MEDIUM"
   );
   const [dueDate, setDueDate] = useState<Date | null>(
-    initialData.due_date ? new Date(initialData.due_date) : null
+    initialData.dueDate ? new Date(initialData.dueDate) : null
   );
 
   // Sync state when initialData changes (edit mode)
   useEffect(() => {
     setName(initialData.name || "");
-    setTargetAmount(initialData.target_amount ?? 0);
+    setTargetAmount(initialData.targetAmount ?? 0);
     setPriority(initialData.priority || "MEDIUM");
-    setDueDate(initialData.due_date ? new Date(initialData.due_date) : null);
+    setDueDate(initialData.dueDate ? new Date(initialData.dueDate) : null);
   }, [initialData, open]);
 
   const handleSave = () => {
     if (!name || !targetAmount || !dueDate) return;
     onSave({
       name,
-      target_amount: targetAmount,
+      targetAmount: targetAmount,
       priority,
-      due_date: dueDate.toISOString().split("T")[0], // YYYY-MM-DD
+      dueDate: dueDate.toISOString().split("T")[0], // YYYY-MM-DD
     });
     onClose();
   };

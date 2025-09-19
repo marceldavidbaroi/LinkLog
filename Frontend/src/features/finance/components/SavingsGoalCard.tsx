@@ -19,7 +19,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { SavingsGoal, Transaction } from "../types/SavingsGoals.type";
+import type { SavingsGoal } from "../types/SavingsGoals.type";
+import type { Transaction } from "../types/Transaction.type";
 
 const priorityColors: Record<string, "error" | "warning" | "success"> = {
   HIGH: "error",
@@ -53,14 +54,14 @@ const SavingsGoalCard: React.FC<SavingsGoalCardProps> = ({
   const [editAmount, setEditAmount] = useState<string>("");
 
   const savedAmount =
-    typeof goal.saved_amount === "string"
-      ? parseFloat(goal.saved_amount)
-      : goal.saved_amount ?? 0;
+    typeof goal.savedAmount === "string"
+      ? parseFloat(goal.savedAmount)
+      : goal.savedAmount ?? 0;
 
   const targetAmount =
-    typeof goal.target_amount === "string"
-      ? parseFloat(goal.target_amount)
-      : goal.target_amount ?? 0;
+    typeof goal.targetAmount === "string"
+      ? parseFloat(goal.targetAmount)
+      : goal.targetAmount ?? 0;
 
   const canAddSavings = savedAmount < targetAmount;
   const hasTransactions = goal.transactions && goal.transactions.length > 0;
@@ -119,8 +120,8 @@ const SavingsGoalCard: React.FC<SavingsGoalCardProps> = ({
         />
         <Typography variant="body2" color="textSecondary">
           Due:{" "}
-          {goal.due_date
-            ? new Date(goal.due_date).toLocaleDateString("en-US", {
+          {goal.dueDate
+            ? new Date(goal.dueDate).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

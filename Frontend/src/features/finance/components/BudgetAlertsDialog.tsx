@@ -21,8 +21,8 @@ export interface Budget {
   amount: string;
   month: number;
   year: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BudgetAlert {

@@ -109,7 +109,7 @@ const TransactionDialog = ({
               {transaction.recurring && (
                 <Box display="flex" alignItems="center" gap={1}>
                   <IntervalIcon color="info" />
-                  <Typography>{transaction.recurring_interval}</Typography>
+                  <Typography>{transaction.recurringInterval}</Typography>
                 </Box>
               )}
             </Box>

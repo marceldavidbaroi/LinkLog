@@ -41,7 +41,7 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
     description: "",
     type: "income",
     recurring: false,
-    recurring_interval: null,
+    recurringInterval: null,
   });
 
   const [errors, setErrors] = useState<
@@ -65,7 +65,7 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
         description: transaction.description ?? "",
         type: transaction.type ?? "income",
         recurring: transaction.recurring ?? false,
-        recurring_interval: transaction.recurring_interval ?? null,
+        recurringInterval: transaction.recurringInterval ?? null,
       });
     } else {
       setForm({
@@ -75,7 +75,7 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
         description: "",
         type: "income",
         recurring: false,
-        recurring_interval: null,
+        recurringInterval: null,
       });
     }
     setErrors({});
@@ -115,8 +115,8 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
       newErrors.amount = "Amount is required and must be greater than 0";
     if (!form.category) newErrors.category = "Category is required";
     if (!form.date) newErrors.date = "Date is required";
-    if (form.recurring && !form.recurring_interval)
-      newErrors.recurring_interval =
+    if (form.recurring && !form.recurringInterval)
+      newErrors.recurringInterval =
         "Interval is required for recurring transactions";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -231,10 +231,10 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
               select
               fullWidth
               label="Recurring Interval"
-              name="recurring_interval"
-              value={form.recurring_interval ?? ""}
+              name="recurringInterval"
+              value={form.recurringInterval ?? ""}
               onChange={handleChange}
-              error={!!errors.recurring_interval}
+              error={!!errors.recurringInterval}
             >
               {recurringIntervals.map((interval) => (
                 <MenuItem key={interval} value={interval}>
@@ -242,8 +242,8 @@ const TransactionFormDialog: React.FC<TransactionFormDialogProps> = ({
                 </MenuItem>
               ))}
             </TextField>
-            {errors.recurring_interval && (
-              <FormHelperText error>{errors.recurring_interval}</FormHelperText>
+            {errors.recurringInterval && (
+              <FormHelperText error>{errors.recurringInterval}</FormHelperText>
             )}
           </>
         )}

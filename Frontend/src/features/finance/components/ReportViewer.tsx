@@ -202,10 +202,10 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
                 <TableRow key={idx}>
                   <TableCell>{goal.goalName ?? "-"}</TableCell>
                   <TableCell>{goal.status ?? "-"}</TableCell>
-                  <TableCell>${goal.saved_amount ?? 0}</TableCell>
-                  <TableCell>${goal.target_amount ?? 0}</TableCell>
+                  <TableCell>${goal.savedAmount ?? 0}</TableCell>
+                  <TableCell>${goal.targetAmount ?? 0}</TableCell>
                   <TableCell>{goal.percentage ?? 0}%</TableCell>
-                  <TableCell>{goal.due_date ?? "-"}</TableCell>
+                  <TableCell>{goal.dueDate ?? "-"}</TableCell>
                 </TableRow>
               )) || (
                 <TableRow>
