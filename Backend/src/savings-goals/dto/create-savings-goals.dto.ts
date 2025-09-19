@@ -16,12 +16,12 @@ export class CreateSavingsGoalDto {
 
   @IsNumber()
   @Min(0)
-  target_amount: number;
+  targetAmount: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  saved_amount?: number;
+  savedAmount?: number;
 
   @IsOptional()
   @IsEnum(Priority, { message: 'Priority must be HIGH, MEDIUM, or LOW' })
@@ -29,5 +29,5 @@ export class CreateSavingsGoalDto {
 
   @IsOptional()
   @IsDateString()
-  due_date?: string;
+  dueDate?: string;
 }

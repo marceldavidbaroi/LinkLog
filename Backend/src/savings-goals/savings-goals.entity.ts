@@ -26,30 +26,36 @@ export class SavingsGoals {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.savings_goals, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.savingsGoals, { onDelete: 'CASCADE' })
   user: User;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
-  target_amount: number;
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'target_amount' })
+  targetAmount: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
-  saved_amount: number;
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    name: 'saved_amount',
+  })
+  savedAmount: number;
 
   @Column({ type: 'enum', enum: Priority, default: Priority.MEDIUM })
   priority: Priority;
 
-  @Column({ type: 'date', nullable: true })
-  due_date: Date;
+  @Column({ type: 'date', nullable: true, name: 'due_date' })
+  dueDate: Date;
 
   @OneToMany(() => Transactions, (transaction) => transaction.savingsGoal)
   transactions: Transactions[];
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

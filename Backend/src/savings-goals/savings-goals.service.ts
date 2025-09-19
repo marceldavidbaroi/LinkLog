@@ -32,7 +32,7 @@ export class SavingsGoalsService {
         )
         .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
 
-    goal.saved_amount = totalSaved;
+    goal.savedAmount = totalSaved;
     await this.savingsGoalsRepository.save(goal);
     return totalSaved;
   }
@@ -78,7 +78,7 @@ export class SavingsGoalsService {
 
     // Recalculate saved_amount for each goal
     data.forEach((goal) => {
-      goal.saved_amount =
+      goal.savedAmount =
         goal.transactions
           ?.filter(
             (t) =>
@@ -102,7 +102,7 @@ export class SavingsGoalsService {
       throw new NotFoundException(`Savings goal with ID ${id} not found`);
 
     // Recalculate saved_amount dynamically
-    goal.saved_amount =
+    goal.savedAmount =
       goal.transactions
         ?.filter(
           (t) =>
@@ -157,7 +157,7 @@ export class SavingsGoalsService {
       type: TransactionType.EXPENSE,
       category: ExpenseCategory.SAVINGS_INVESTMENTS,
       amount,
-      description: `Added ${amount} Tk to savings goal "${goal.name}" (Target: ${goal.target_amount} Tk)`,
+      description: `Added ${amount} Tk to savings goal "${goal.name}" (Target: ${goal.targetAmount} Tk)`,
       date: new Date().toISOString(),
       savingsGoalId: goal.id,
     };
