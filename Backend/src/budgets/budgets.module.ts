@@ -13,5 +13,6 @@ import { Transactions } from 'src/transactions/transactions.entity';
   ],
   providers: [BudgetsService],
   controllers: [BudgetsController],
+  exports: [BudgetsService],
 })
 export class BudgetsModule {}

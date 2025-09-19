@@ -1,10 +1,7 @@
 import type { ApiResponse } from "../../../types/api-response.type";
 import Api from "../api/transactionsApi";
 import { useTransactionsStore } from "../store/transactionsStore";
-import type {
-  Transaction,
-  TransactionSummary,
-} from "../types/Transaction.type";
+import type { Transaction } from "../types/Transaction.type";
 
 export const useTransactions = () => {
   const {
@@ -13,7 +10,6 @@ export const useTransactions = () => {
     setError,
     transactionList,
     setTransactionList,
-    setTransactionSummary,
   } = useTransactionsStore();
 
   /** Create a new transaction */

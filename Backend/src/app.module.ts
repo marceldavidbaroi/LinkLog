@@ -10,6 +10,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { FinanceDashboardModule } from './finance-dashboard/finance-dashboard.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { SavingsGoalsModule } from './savings-goals/savings-goals.module';
+import { ReportsModule } from './reports/reports.module';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -24,6 +25,7 @@ dotenv.config();
     FinanceDashboardModule,
     BudgetsModule,
     SavingsGoalsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,6 +11,7 @@ import { UserPreferences } from './userPreferences.entity';
 import { Transactions } from 'src/transactions/transactions.entity';
 import { Budgets } from 'src/budgets/budgets.entity';
 import { SavingsGoals } from 'src/savings-goals/savings-goals.entity';
+import { Reports } from 'src/reports/reports.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -53,4 +54,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => SavingsGoals, (savings_goal) => savings_goal.user)
   savings_goals: SavingsGoals[];
+
+  @OneToMany(() => Reports, (report) => report.user)
+  reports: Reports[];
 }

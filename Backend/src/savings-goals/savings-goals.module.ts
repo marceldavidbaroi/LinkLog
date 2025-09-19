@@ -9,5 +9,6 @@ import { SavingsGoals } from './savings-goals.entity';
   imports: [TypeOrmModule.forFeature([SavingsGoals]), TransactionsModule],
   controllers: [SavingsGoalsController],
   providers: [SavingsGoalsService],
+  exports: [SavingsGoalsService],
 })
 export class SavingsGoalsModule {}
