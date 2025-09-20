@@ -22,18 +22,11 @@ const ReportsDetails = () => {
       await fetchReport();
     }
   };
-  const handleExport = async (data: any, format: any) => {
-    console.log("Download triggered");
-  };
 
   return (
     <>
       {reportStore.report ? (
-        <ReportViewer
-          report={reportStore.report}
-          onUpdate={handleUpdate}
-          onExport={handleExport}
-        />
+        <ReportViewer report={reportStore.report} onUpdate={handleUpdate} />
       ) : (
         <p>Loading report...</p>
       )}

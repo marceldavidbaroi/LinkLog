@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Card,
@@ -11,8 +11,6 @@ import {
   TableRow,
   Divider,
   Button,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -23,48 +21,32 @@ import {
   Assignment,
   Update,
 } from "@mui/icons-material";
-import { type ExportFormat } from "../types/Reports.type";
+import { useNavigate } from "react-router-dom";
 
 type ReportProps = {
-  report: any; // Replace with your type
+  report: any; // Replace with your proper type
   onUpdate?: (reportId: number) => void;
-  onExport?: (reportId: number, format: ExportFormat) => void;
 };
 
-const ReportViewer: React.FC<ReportProps> = ({
-  report,
-  onUpdate,
-  onExport,
-}) => {
+const ReportViewer: React.FC<ReportProps> = ({ report, onUpdate }) => {
   const data = report?.data ?? {};
   const updatedAt = report?.updatedAt ? new Date(report.updatedAt) : null;
   const now = new Date();
-
   const showUpdate = updatedAt && updatedAt < now;
+
+  const navigate = useNavigate();
 
   const formatCurrency = (val: number) =>
     `Tk ${val?.toLocaleString("en-BD") ?? 0}`;
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => setAnchorEl(null);
-
-  const handleExport = (format: ExportFormat) => {
-    onExport?.(report, format);
-    handleClose();
+  const handlePrintRedirect = () => {
+    navigate(`/reports/print?id=${report.id}`);
   };
 
   return (
     <Box
-      sx={{
-        p: 2,
-        maxWidth: "900px", // narrower layout
-        mx: "auto",
-      }}
+      className="report-print-container"
+      sx={{ p: 2, maxWidth: "900px", mx: "auto", backgroundColor: "white" }}
     >
       {/* Header */}
       <Box
@@ -88,7 +70,7 @@ const ReportViewer: React.FC<ReportProps> = ({
             startIcon={<Update />}
             size="small"
             sx={{ mt: 1 }}
-            onClick={() => onUpdate?.(report.id)} // emit report id
+            onClick={() => onUpdate?.(report.id)}
           >
             Update Report
           </Button>
@@ -98,23 +80,18 @@ const ReportViewer: React.FC<ReportProps> = ({
           color="primary"
           size="small"
           sx={{ mt: 1, ml: 1 }}
-          onClick={handleClick}
+          onClick={handlePrintRedirect}
         >
-          Export
+          Print Report
         </Button>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={() => handleExport("csv")}>Export as CSV</MenuItem>
-          <MenuItem onClick={() => handleExport("pdf")}>Export as PDF</MenuItem>
-        </Menu>
       </Box>
 
       {/* Summary */}
-      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+      <Card
+        className="print-section"
+        variant="outlined"
+        sx={{ mb: 3, borderRadius: 0 }}
+      >
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Overview
@@ -161,7 +138,11 @@ const ReportViewer: React.FC<ReportProps> = ({
       </Card>
 
       {/* Income */}
-      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+      <Card
+        className="print-section"
+        variant="outlined"
+        sx={{ mb: 3, borderRadius: 0 }}
+      >
         <CardContent>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <PieChart color="primary" />
@@ -186,7 +167,7 @@ const ReportViewer: React.FC<ReportProps> = ({
                     }}
                   >
                     <TableCell>{item.category ?? "-"}</TableCell>
-                    <TableCell fontWeight="bold" color="success.main">
+                    <TableCell>
                       <Typography fontWeight="bold" color="success.main">
                         {formatCurrency(item.amount ?? 0)}
                       </Typography>
@@ -207,7 +188,11 @@ const ReportViewer: React.FC<ReportProps> = ({
       </Card>
 
       {/* Expenses */}
-      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+      <Card
+        className="print-section"
+        variant="outlined"
+        sx={{ mb: 3, borderRadius: 0 }}
+      >
         <CardContent>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <PieChart color="primary" />
@@ -253,7 +238,11 @@ const ReportViewer: React.FC<ReportProps> = ({
       </Card>
 
       {/* Budgets */}
-      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+      <Card
+        className="print-section"
+        variant="outlined"
+        sx={{ mb: 3, borderRadius: 0 }}
+      >
         <CardContent>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <Assignment color="primary" />
@@ -310,7 +299,11 @@ const ReportViewer: React.FC<ReportProps> = ({
       </Card>
 
       {/* Savings Goals */}
-      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+      <Card
+        className="print-section"
+        variant="outlined"
+        sx={{ mb: 3, borderRadius: 0 }}
+      >
         <CardContent>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <Savings color="primary" />
