@@ -1,55 +1,69 @@
 import React, { useState } from "react";
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  IconButton,
+  Button,
+} from "@mui/material";
+import { Delete, Description, Update } from "@mui/icons-material";
 
 type ReportCardProps = {
   report?: any; // ideally define Report type
   onGenerate?: () => void;
   onSelect?: (id: number) => void; // emit report id on click
+  onDelete?: (id: number) => void; // emit report id on delete
 };
 
 const ReportCard: React.FC<ReportCardProps> = ({
   report,
   onGenerate,
   onSelect,
+  onDelete,
 }) => {
-  const [visible, setVisible] = useState(true); // state to hide the generate card
+  const [visible, setVisible] = useState(true);
 
   const handleGenerateClick = () => {
-    setVisible(false); // hide the card
-    onGenerate?.(); // call passed function
+    setVisible(false);
+    onGenerate?.();
   };
 
-  // If no report and the generate card has been hidden
   if (!report && !visible) return null;
 
   if (!report) {
     return (
       <Card
         sx={{
-          p: 1,
+          width: 320,
+          mx: "auto",
+          mt: 4,
           textAlign: "center",
           cursor: "pointer",
-          "&:hover": { boxShadow: 4 },
+          borderRadius: 0,
+          border: 1,
+          borderColor: "primary.main",
+          "&:hover": { boxShadow: 4, bgcolor: "grey.50" },
         }}
         onClick={handleGenerateClick}
       >
-        <CardContent sx={{ p: 1 }}>
-          <Typography variant="body2" gutterBottom>
+        <CardContent>
+          <Description color="primary" sx={{ fontSize: 40 }} />
+          <Typography variant="body1" gutterBottom sx={{ mt: 1 }}>
             No report available
           </Typography>
-          <Typography
-            variant="button"
+          <Button
+            variant="contained"
             color="primary"
             sx={{ fontWeight: "bold" }}
           >
             + Generate Report
-          </Typography>
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
-  // Safety checks for report fields
   const id = report?.id ?? 0;
   const reportType = report?.reportType?.toUpperCase() ?? "UNKNOWN";
   const periodStart = report?.periodStart ?? "N/A";
@@ -61,28 +75,51 @@ const ReportCard: React.FC<ReportCardProps> = ({
   return (
     <Card
       sx={{
-        mb: 1,
-        cursor: "pointer",
-        "&:hover": { boxShadow: 4, bgcolor: "grey.50" },
+        width: 320,
+        mx: "auto",
+        mt: 3,
+        borderRadius: 0,
+        border: 1,
+        borderColor: "grey.300",
+        "&:hover": { boxShadow: 6, bgcolor: "grey.50" },
+        position: "relative",
       }}
-      onClick={() => onSelect?.(id)}
     >
-      <CardContent sx={{ p: 1 }}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {reportType} Report
-        </Typography>
+      <CardContent sx={{ cursor: "pointer" }} onClick={() => onSelect?.(id)}>
+        <Box display="flex" alignItems="center" gap={1} mb={1}>
+          <Description color="primary" />
+          <Typography variant="h6" fontWeight="bold">
+            {reportType} Report
+          </Typography>
+        </Box>
 
         <Box>
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography variant="body2" color="text.secondary">
             Start: <strong>{periodStart}</strong>
           </Typography>
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography variant="body2" color="text.secondary">
             End: <strong>{periodEnd}</strong>
           </Typography>
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography variant="body2" color="text.secondary">
             Updated: <strong>{updatedAt}</strong>
           </Typography>
         </Box>
+
+        {/* Delete Button */}
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation(); // prevent triggering onSelect
+            onDelete?.(id);
+          }}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            color: "error.main",
+          }}
+        >
+          <Delete />
+        </IconButton>
       </CardContent>
     </Card>
   );

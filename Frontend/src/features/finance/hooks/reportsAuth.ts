@@ -1,8 +1,7 @@
 import type { ApiResponse } from "../../../types/api-response.type";
 import Api from "../api/reportsApi";
-
 import { useReportStore } from "../store/reportStore";
-import type { FindReportParams } from "../types/Reports.type";
+import type { FindReportParams, ExportFormat } from "../types/Reports.type";
 
 export const useReports = () => {
   const {
@@ -14,7 +13,7 @@ export const useReports = () => {
     report,
   } = useReportStore();
 
-  const getAll = async (query = {}) => {
+  const getAll = async (query: FindReportParams = {}) => {
     setLoading(true);
     setError(null);
     setReport(null);
@@ -28,6 +27,7 @@ export const useReports = () => {
       setLoading(false);
     }
   };
+
   const getOne = async (id: number) => {
     setLoading(true);
     setError(null);
@@ -42,7 +42,7 @@ export const useReports = () => {
     }
   };
 
-  const create = async (payload: FindReportParams) => {
+  const create = async (payload: Partial<FindReportParams>) => {
     setLoading(true);
     setError(null);
     try {
@@ -56,9 +56,70 @@ export const useReports = () => {
     }
   };
 
+  const update = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data }: ApiResponse<Report> = await Api.update(id);
+      setReport(data || null);
+      return data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const remove = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await Api.remove(id);
+      // Optional: remove deleted report from store
+      setReportsList(reportsList.filter((r) => r.id !== id));
+      if (report?.id === id) setReport(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const topCategories = async (query: Partial<FindReportParams> = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data }: ApiResponse<Report> = await Api.topCategories(query);
+      return data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categoryCharts = async (query: Partial<FindReportParams> = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data }: ApiResponse<Report> = await Api.categoryCharts(query);
+      return data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     getAll,
     getOne,
     create,
+    update,
+    remove,
+    topCategories,
+    categoryCharts,
+    reportsList,
+    report,
   };
 };

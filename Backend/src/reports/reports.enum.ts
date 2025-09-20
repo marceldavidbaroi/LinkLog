@@ -5,6 +5,6 @@ export enum ReportType {
 }
 
 export enum ExportFormat {
-  PDF = 'pdf',
-  CSV = 'csv',
+  PDF = 'PDF',
+  CSV = 'CSV',
 }

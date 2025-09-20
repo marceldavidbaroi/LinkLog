@@ -27,10 +27,8 @@ const getOne = async (id: number): Promise<ApiResponse<Report>> => {
 };
 
 // Update budget by id
-const update = async (payload: {
-  id: number;
-}): Promise<ApiResponse<Report>> => {
-  return await api.patch(`/reports/${payload.id}`);
+const update = async (id: number): Promise<ApiResponse<Report>> => {
+  return await api.patch(`/reports/${id}`);
 };
 
 // Delete budget by id
@@ -49,13 +47,6 @@ const categoryCharts = async (
   return await api.get("/reports/category-charts", { params: query });
 };
 
-const exportReport = async (
-  id: number,
-  query: { format: ExportFormat }
-): Promise<ApiResponse<null>> => {
-  return await api.get(`/reports/export/${id}`, { params: query });
-};
-
 // ---------- Export ----------
 const ReportsApi = {
   create,
@@ -65,7 +56,6 @@ const ReportsApi = {
   remove,
   topCategories,
   categoryCharts,
-  exportReport,
 };
 
 export default ReportsApi;

@@ -1,101 +1,200 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
   Divider,
+  Button,
+  Menu,
+  MenuItem,
 } from "@mui/material";
+import {
+  TrendingUp,
+  TrendingDown,
+  AccountBalance,
+  Savings,
+  PieChart,
+  Assignment,
+  Update,
+} from "@mui/icons-material";
+import { type ExportFormat } from "../types/Reports.type";
 
 type ReportProps = {
-  report: any; // ideally replace with a proper TypeScript interface
+  report: any; // Replace with your type
+  onUpdate?: (reportId: number) => void;
+  onExport?: (reportId: number, format: ExportFormat) => void;
 };
 
-const ReportViewer: React.FC<ReportProps> = ({ report }) => {
+const ReportViewer: React.FC<ReportProps> = ({
+  report,
+  onUpdate,
+  onExport,
+}) => {
   const data = report?.data ?? {};
+  const updatedAt = report?.updatedAt ? new Date(report.updatedAt) : null;
+  const now = new Date();
+
+  const showUpdate = updatedAt && updatedAt < now;
+
+  const formatCurrency = (val: number) =>
+    `Tk ${val?.toLocaleString("en-BD") ?? 0}`;
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => setAnchorEl(null);
+
+  const handleExport = (format: ExportFormat) => {
+    onExport?.(report, format);
+    handleClose();
+  };
 
   return (
-    <Box sx={{ p: 2 }}>
-      {/* Report Header */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Typography variant="h5" fontWeight="bold">
-            {report?.reportType?.toUpperCase() ?? "REPORT"}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {data.period?.start ?? "-"} → {data.period?.end ?? "-"}
-          </Typography>
-        </CardContent>
-      </Card>
+    <Box
+      sx={{
+        p: 2,
+        maxWidth: "900px", // narrower layout
+        mx: "auto",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          mb: 3,
+          borderBottom: "3px solid",
+          borderColor: "primary.main",
+          pb: 1,
+        }}
+      >
+        <Typography variant="h5" color="primary" fontWeight="bold">
+          {report?.reportType?.toUpperCase() ?? "REPORT"}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {data.period?.start ?? "-"} → {data.period?.end ?? "-"}
+        </Typography>
+        {showUpdate && (
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<Update />}
+            size="small"
+            sx={{ mt: 1 }}
+            onClick={() => onUpdate?.(report.id)} // emit report id
+          >
+            Update Report
+          </Button>
+        )}
+        <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          sx={{ mt: 1, ml: 1 }}
+          onClick={handleClick}
+        >
+          Export
+        </Button>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={() => handleExport("csv")}>Export as CSV</MenuItem>
+          <MenuItem onClick={() => handleExport("pdf")}>Export as PDF</MenuItem>
+        </Menu>
+      </Box>
 
       {/* Summary */}
-      <Card sx={{ mb: 2 }}>
+      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Summary
+            Overview
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={6} md={3}>
-              <Typography>Total Income</Typography>
-              <Typography fontWeight="bold">
-                ${data.summary?.totalIncome ?? 0}
+          <Box display="flex" flexWrap="wrap" gap={4}>
+            <Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <TrendingUp color="primary" />
+                <Typography>Total Income</Typography>
+              </Box>
+              <Typography fontWeight="bold" color="success.main">
+                {formatCurrency(data.summary?.totalIncome ?? 0)}
               </Typography>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Typography>Total Expense</Typography>
-              <Typography fontWeight="bold">
-                ${data.summary?.totalExpense ?? 0}
+            </Box>
+            <Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <TrendingDown color="primary" />
+                <Typography>Total Expense</Typography>
+              </Box>
+              <Typography fontWeight="bold" color="error.main">
+                {formatCurrency(data.summary?.totalExpense ?? 0)}
               </Typography>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Typography>Net Savings</Typography>
-              <Typography fontWeight="bold">
-                ${data.summary?.netSavings ?? 0}
+            </Box>
+            <Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Savings color="primary" />
+                <Typography>Net Savings</Typography>
+              </Box>
+              <Typography fontWeight="bold" color="info.main">
+                {formatCurrency(data.summary?.netSavings ?? 0)}
               </Typography>
-            </Grid>
-            <Grid item xs={6} md={3}>
-              <Typography>Budgeted</Typography>
-              <Typography fontWeight="bold">
-                ${data.summary?.budgetedAmount ?? 0}
+            </Box>
+            <Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <AccountBalance color="primary" />
+                <Typography>Budgeted</Typography>
+              </Box>
+              <Typography fontWeight="bold" color="warning.main">
+                {formatCurrency(data.summary?.budgetedAmount ?? 0)}
               </Typography>
-            </Grid>
-          </Grid>
-          <Divider sx={{ my: 2 }} />
-          <Typography>
-            Savings Goal Progress:{" "}
-            {data.summary?.savingsProgress?.percentage ?? 0}%
-          </Typography>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
       {/* Income */}
-      <Card sx={{ mb: 2 }}>
+      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Income by Category
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <PieChart color="primary" />
+            <Typography variant="h6">Income by Category</Typography>
+          </Box>
           <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>Category</TableCell>
                 <TableCell>Amount</TableCell>
-                <TableCell>Percentage</TableCell>
+                <TableCell>%</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.income?.byCategory?.map((item: any, idx: number) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.category ?? "-"}</TableCell>
-                  <TableCell>${item.amount ?? 0}</TableCell>
-                  <TableCell>{item.percentage ?? 0}%</TableCell>
-                </TableRow>
-              )) || (
+              {data.income?.byCategory?.length ? (
+                data.income.byCategory.map((item: any, idx: number) => (
+                  <TableRow
+                    key={idx}
+                    sx={{
+                      backgroundColor:
+                        idx % 2 === 0 ? "action.hover" : "background.default",
+                    }}
+                  >
+                    <TableCell>{item.category ?? "-"}</TableCell>
+                    <TableCell fontWeight="bold" color="success.main">
+                      <Typography fontWeight="bold" color="success.main">
+                        {formatCurrency(item.amount ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{item.percentage ?? 0}%</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
                     No income data
@@ -108,27 +207,40 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
       </Card>
 
       {/* Expenses */}
-      <Card sx={{ mb: 2 }}>
+      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Expenses by Category
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <PieChart color="primary" />
+            <Typography variant="h6">Expenses by Category</Typography>
+          </Box>
           <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>Category</TableCell>
                 <TableCell>Amount</TableCell>
-                <TableCell>Percentage</TableCell>
+                <TableCell>%</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.expenses?.byCategory?.map((item: any, idx: number) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.category ?? "-"}</TableCell>
-                  <TableCell>${item.amount ?? 0}</TableCell>
-                  <TableCell>{item.percentage ?? 0}%</TableCell>
-                </TableRow>
-              )) || (
+              {data.expenses?.byCategory?.length ? (
+                data.expenses.byCategory.map((item: any, idx: number) => (
+                  <TableRow
+                    key={idx}
+                    sx={{
+                      backgroundColor:
+                        idx % 2 === 0 ? "action.hover" : "background.default",
+                    }}
+                  >
+                    <TableCell>{item.category ?? "-"}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight="bold" color="error.main">
+                        {formatCurrency(item.amount ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{item.percentage ?? 0}%</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
                     No expense data
@@ -141,11 +253,12 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
       </Card>
 
       {/* Budgets */}
-      <Card sx={{ mb: 2 }}>
+      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Budgets by Category
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Assignment color="primary" />
+            <Typography variant="h6">Budgets by Category</Typography>
+          </Box>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -156,14 +269,30 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.budgets?.byCategory?.map((item: any, idx: number) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.category ?? "-"}</TableCell>
-                  <TableCell>${item.budgeted ?? 0}</TableCell>
-                  <TableCell>${item.spent ?? 0}</TableCell>
-                  <TableCell>{item.percentageUsed ?? 0}%</TableCell>
-                </TableRow>
-              )) || (
+              {data.budgets?.byCategory?.length ? (
+                data.budgets.byCategory.map((item: any, idx: number) => (
+                  <TableRow
+                    key={idx}
+                    sx={{
+                      backgroundColor:
+                        idx % 2 === 0 ? "action.hover" : "background.default",
+                    }}
+                  >
+                    <TableCell>{item.category ?? "-"}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight="bold" color="warning.main">
+                        {formatCurrency(item.budgeted ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontWeight="bold" color="error.main">
+                        {formatCurrency(item.spent ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{item.percentageUsed ?? 0}%</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
                     No budget data
@@ -181,11 +310,12 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
       </Card>
 
       {/* Savings Goals */}
-      <Card>
+      <Card variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Savings Goals
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Savings color="primary" />
+            <Typography variant="h6">Savings Goals</Typography>
+          </Box>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -198,16 +328,32 @@ const ReportViewer: React.FC<ReportProps> = ({ report }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.savingsGoals?.map((goal: any, idx: number) => (
-                <TableRow key={idx}>
-                  <TableCell>{goal.goalName ?? "-"}</TableCell>
-                  <TableCell>{goal.status ?? "-"}</TableCell>
-                  <TableCell>${goal.savedAmount ?? 0}</TableCell>
-                  <TableCell>${goal.targetAmount ?? 0}</TableCell>
-                  <TableCell>{goal.percentage ?? 0}%</TableCell>
-                  <TableCell>{goal.dueDate ?? "-"}</TableCell>
-                </TableRow>
-              )) || (
+              {data.savingsGoals?.length ? (
+                data.savingsGoals.map((goal: any, idx: number) => (
+                  <TableRow
+                    key={idx}
+                    sx={{
+                      backgroundColor:
+                        idx % 2 === 0 ? "action.hover" : "background.default",
+                    }}
+                  >
+                    <TableCell>{goal.goalName ?? "-"}</TableCell>
+                    <TableCell>{goal.status ?? "-"}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight="bold" color="info.main">
+                        {formatCurrency(goal.savedAmount ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontWeight="bold" color="warning.main">
+                        {formatCurrency(goal.targetAmount ?? 0)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{goal.percentage ?? 0}%</TableCell>
+                    <TableCell>{goal.dueDate ?? "-"}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     No savings goals

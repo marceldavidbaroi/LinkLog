@@ -78,7 +78,7 @@ export class ReportsService {
   /** Find one report */
   async findOne(id: number, user: User): Promise<Reports> {
     const report = await this.reportsRepository.findOne({
-      where: { id: user.id },
+      where: { id, user: { id: user.id } },
     });
 
     if (!report) throw new NotFoundException(`Report ${id} not found`);
@@ -331,7 +331,7 @@ export class ReportsService {
     const transactions = await this.getTransactions(user, start, end);
 
     const { data: budgets } = await this.budgetsService.findAll(user, {
-      month: start.getMonth() + 1, // optional: only for monthly budgets
+      month: start.getMonth() + 1, // for monthly budgets
       year: start.getFullYear(),
       page: 1,
       limit: 1000,
@@ -340,7 +340,7 @@ export class ReportsService {
     const { data: savingsGoals } = await this.savingsGoalsService.findAll(
       user,
       {
-        month: start.getMonth() + 1, // optional: only for monthly savings goals
+        month: start.getMonth() + 1, // for monthly savings goals
         year: start.getFullYear(),
         page: 1,
         limit: 1000,
@@ -356,7 +356,7 @@ export class ReportsService {
       .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // Group by category
+    // --- Group by category ---
     const groupByCategory = (items: any[], type: TransactionType) => {
       const grouped: Record<string, number> = {};
       items
@@ -384,7 +384,7 @@ export class ReportsService {
       TransactionType.EXPENSE,
     );
 
-    // Trends
+    // --- Trends ---
     const groupByPeriod = (items: any[], type: TransactionType) => {
       const grouped: Record<string, number> = {};
       items
@@ -392,8 +392,10 @@ export class ReportsService {
         .forEach((t) => {
           const periodKey =
             report.reportType === ReportType.MONTHLY
-              ? new Date(t.date).toISOString().split('T')[0]
-              : `${new Date(t.date).getMonth() + 1}-${new Date(t.date).getFullYear()}`;
+              ? new Date(t.date).toISOString().split('T')[0] // daily breakdown
+              : `${new Date(t.date).getMonth() + 1}-${new Date(
+                  t.date,
+                ).getFullYear()}`;
           grouped[periodKey] = (grouped[periodKey] ?? 0) + Number(t.amount);
         });
       return Object.entries(grouped).map(([period, amount]) => ({
@@ -405,21 +407,20 @@ export class ReportsService {
     const incomeTrend = groupByPeriod(transactions, TransactionType.INCOME);
     const expenseTrend = groupByPeriod(transactions, TransactionType.EXPENSE);
 
-    // Budgets by category
-    const budgetsByCategory = budgets.map((b) => ({
-      category: b.category,
-      budgeted: Number(b.amount),
-      spent: transactions
+    // --- Budgets by category ---
+    const budgetsByCategory = budgets.map((b) => {
+      const spent = transactions
         .filter((t) => t.category === b.category)
-        .reduce((sum, t) => sum + Number(t.amount), 0),
-      percentageUsed: +(
-        (transactions
-          .filter((t) => t.category === b.category)
-          .reduce((sum, t) => sum + Number(t.amount), 0) /
-          Number(b.amount)) *
-          100 || 0
-      ).toFixed(2),
-    }));
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      return {
+        category: b.category,
+        budgeted: Number(b.amount),
+        spent,
+        percentageUsed: b.amount
+          ? +((spent / Number(b.amount)) * 100).toFixed(2)
+          : 0,
+      };
+    });
 
     const overallBudgeted = budgets.reduce(
       (sum, b) => sum + Number(b.amount),
@@ -429,7 +430,7 @@ export class ReportsService {
       .filter((t) => budgets.some((b) => b.category === t.category))
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // Savings goals
+    // --- Savings goals ---
     savingsGoals.forEach((g) => {
       g.savedAmount =
         g.transactions
@@ -442,7 +443,7 @@ export class ReportsService {
     });
 
     const reportData = {
-      period: report.data.period,
+      period: report.data.period, // keep original period info
       summary: {
         totalIncome,
         totalExpense,
@@ -451,14 +452,17 @@ export class ReportsService {
         budgetDifference: overallBudgeted - overallSpent,
         savingsProgress: savingsGoals[0]
           ? {
-              targetAmount: savingsGoals[0].targetAmount,
-              savedAmount: savingsGoals[0].savedAmount,
-              percentage: +(
-                (savingsGoals[0].savedAmount / savingsGoals[0].targetAmount) *
-                100
-              ).toFixed(2),
+              targetAmount: Number(savingsGoals[0].targetAmount ?? 0),
+              savedAmount: Number(savingsGoals[0].savedAmount ?? 0),
+              percentage: savingsGoals[0].targetAmount
+                ? +(
+                    (Number(savingsGoals[0].savedAmount ?? 0) /
+                      Number(savingsGoals[0].targetAmount)) *
+                    100
+                  ).toFixed(2)
+                : 0,
             }
-          : {},
+          : null,
       },
       income: { byCategory: incomeByCategory, trend: incomeTrend },
       expenses: { byCategory: expensesByCategory, trend: expenseTrend },
@@ -467,23 +471,24 @@ export class ReportsService {
         overallUsage: {
           budgeted: overallBudgeted,
           spent: overallSpent,
-          percentageUsed: +(
-            (overallSpent / overallBudgeted) * 100 || 0
-          ).toFixed(2),
+          percentageUsed: overallBudgeted
+            ? +((overallSpent / overallBudgeted) * 100).toFixed(2)
+            : 0,
         },
       },
       savingsGoals: savingsGoals.map((g) => {
-        const dueDate = new Date(g.dueDate);
+        const dueDate = g.dueDate ? new Date(g.dueDate) : null;
+        const saved = Number(g.savedAmount ?? 0);
+        const target = Number(g.targetAmount ?? 0);
         let status: 'inProgress' | 'completed' | 'overdue' = 'inProgress';
-        if (g.savedAmount >= g.targetAmount) status = 'completed';
-        else if (dueDate < new Date()) status = 'overdue';
-
+        if (saved >= target && target > 0) status = 'completed';
+        else if (dueDate && dueDate < new Date()) status = 'overdue';
         return {
           goalName: g.name,
-          targetAmount: g.targetAmount,
-          savedAmount: g.savedAmount,
-          percentage: +((g.savedAmount / g.targetAmount) * 100).toFixed(2),
-          dueDate: dueDate.toISOString().split('T')[0],
+          targetAmount: target,
+          savedAmount: saved,
+          percentage: target ? +((saved / target) * 100).toFixed(2) : 0,
+          dueDate: dueDate ? dueDate.toISOString().split('T')[0] : null,
           status,
         };
       }),
@@ -499,41 +504,64 @@ export class ReportsService {
     await this.reportsRepository.remove(report);
   }
 
-  /** Export report as PDF/CSV */
-  async export(id: number, format: ExportFormat, user: User): Promise<Buffer> {
-    const report = await this.findOne(id, user);
-    return ReportExport.exportReport(report, format);
-  }
+  /** Helper: group by type + category */
+  private groupByTypeAndCategory(transactions: any[]) {
+    const grouped: Record<string, Record<string, number>> = {
+      income: {},
+      expense: {},
+    };
 
-  /** Helper: group expenses by category */
-  private groupExpenses(transactions: any[]) {
-    const grouped: Record<string, number> = {};
-    transactions
-      .filter((t) => t.type === 'EXPENSE')
-      .forEach((t) => {
-        grouped[t.category] = (grouped[t.category] ?? 0) + Number(t.amount);
-      });
+    transactions.forEach((t) => {
+      const type = t.type.toLowerCase();
+      if (type !== 'income' && type !== 'expense') return;
+
+      grouped[type][t.category] =
+        (grouped[type][t.category] ?? 0) + Number(t.amount);
+    });
+
     return grouped;
   }
 
-  /** Top 3 categories by spending */
   async topCategories(user: User, month?: number, year?: number) {
-    const start = new Date(
-      year ?? new Date().getFullYear(),
-      (month ?? 1) - 1,
-      1,
+    const targetYear = year ?? new Date().getFullYear();
+
+    let startStr: string;
+    let endStr: string;
+
+    if (month) {
+      const mm = month.toString().padStart(2, '0');
+      startStr = `${targetYear}-${mm}-01`;
+      const lastDay = new Date(targetYear, month, 0).getDate();
+      endStr = `${targetYear}-${mm}-${lastDay}`;
+    } else {
+      startStr = `${targetYear}-01-01`;
+      endStr = `${targetYear}-12-31`;
+    }
+
+    const transactions = await this.getTransactions(
+      user,
+      new Date(startStr),
+      new Date(endStr),
     );
-    const end = new Date(year ?? new Date().getFullYear(), month ?? 12, 31);
 
-    const transactions = await this.getTransactions(user, start, end);
-    const groupedExpenses = this.groupExpenses(transactions);
+    // ✅ use new helper
+    const grouped = this.groupByTypeAndCategory(transactions);
+    console.log('Grouped transactions:', grouped);
 
-    return Object.entries(groupedExpenses)
-      .sort(([, totalA], [, totalB]) => totalB - totalA)
+    const topExpenses = Object.entries(grouped.expense)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
       .map(([category, total]) => ({ category, total }));
+
+    const topIncomes = Object.entries(grouped.income)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([category, total]) => ({ category, total }));
+
+    return { topExpenses, topIncomes };
   }
 
+  /** Category charts (pie/bar data) */
   /** Category charts (pie/bar data) */
   async categoryCharts(user: User, month?: number, year?: number) {
     const start = new Date(
@@ -544,11 +572,19 @@ export class ReportsService {
     const end = new Date(year ?? new Date().getFullYear(), month ?? 12, 31);
 
     const transactions = await this.getTransactions(user, start, end);
-    const groupedExpenses = this.groupExpenses(transactions);
 
-    return Object.entries(groupedExpenses).map(([category, value]) => ({
-      category,
-      value,
-    }));
+    // ✅ use unified grouping
+    const grouped = this.groupByTypeAndCategory(transactions);
+
+    return {
+      expenses: Object.entries(grouped.expense).map(([category, value]) => ({
+        category,
+        value,
+      })),
+      incomes: Object.entries(grouped.income).map(([category, value]) => ({
+        category,
+        value,
+      })),
+    };
   }
 }

@@ -8,6 +8,9 @@ import {
   Body,
   Patch,
   ParseEnumPipe,
+  ParseIntPipe,
+  Res,
+  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { ReportsService } from './reports.service';
@@ -17,6 +20,8 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { ExportFormat } from './reports.enum';
 import { FilterReportsDto } from './dto/filter-reports.dto';
 import { CreateReportDto } from './dto/create-report.dto';
+
+import type { Response } from 'express';
 
 @Controller('reports')
 @UseGuards(AuthGuard('jwt'))
@@ -34,28 +39,6 @@ export class ReportsController {
       success: true,
       message: 'Reports fetched successfully',
       data: reports,
-    };
-  }
-
-  /** Get a single report */
-  @Get(':id')
-  async findOne(@Param('id') id: number, @GetUser() user: User) {
-    const report = await this.reportsService.findOne(id, user);
-    return {
-      success: true,
-      message: 'Report fetched successfully',
-      data: report,
-    };
-  }
-
-  /** Update a report */
-  @Patch(':id')
-  async update(@Param('id') id: number, @GetUser() user: User) {
-    const report = await this.reportsService.update(id, user);
-    return {
-      success: true,
-      message: 'Report updated successfully',
-      data: report,
     };
   }
 
@@ -77,33 +60,6 @@ export class ReportsController {
       data: report,
     };
   }
-
-  /** Delete a cached report */
-  @Delete(':id')
-  async remove(@Param('id') id: number, @GetUser() user: User) {
-    await this.reportsService.remove(id, user);
-    return {
-      success: true,
-      message: 'Report deleted successfully',
-      data: null,
-    };
-  }
-
-  /** Export report as PDF/CSV */
-  @Get('export/:id')
-  async export(
-    @Param('id') id: number,
-    @Query('format', new ParseEnumPipe(ExportFormat)) format: ExportFormat,
-    @GetUser() user: User,
-  ) {
-    const buffer = await this.reportsService.export(id, format, user);
-    return {
-      success: true,
-      message: 'Report exported successfully',
-      data: buffer,
-    };
-  }
-
   /** Top 3 categories by spending */
   @Get('top-categories')
   async topCategories(
@@ -139,6 +95,39 @@ export class ReportsController {
       success: true,
       message: 'Category charts fetched successfully',
       data: categoryCharts,
+    };
+  }
+
+  /** Get a single report */
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+    const report = await this.reportsService.findOne(id, user);
+    return {
+      success: true,
+      message: 'Report fetched successfully',
+      data: report,
+    };
+  }
+
+  /** Update a report */
+  @Patch(':id')
+  async update(@Param('id') id: number, @GetUser() user: User) {
+    const report = await this.reportsService.update(id, user);
+    return {
+      success: true,
+      message: 'Report updated successfully',
+      data: report,
+    };
+  }
+
+  /** Delete a cached report */
+  @Delete(':id')
+  async remove(@Param('id') id: number, @GetUser() user: User) {
+    await this.reportsService.remove(id, user);
+    return {
+      success: true,
+      message: 'Report deleted successfully',
+      data: null,
     };
   }
 }

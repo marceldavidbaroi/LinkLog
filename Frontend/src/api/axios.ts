@@ -22,6 +22,11 @@ api.interceptors.request.use((config: AxiosRequestConfig) => {
 // Response interceptor: handle notifications and 401
 api.interceptors.response.use(
   (response) => {
+    // If the request expects a blob, return it as-is
+    if (response.config.responseType === "blob") {
+      return response;
+    }
+
     const notify = useNotificationStore.getState().setNotification;
 
     // Auto-show success for modifying requests
@@ -53,7 +58,19 @@ api.interceptors.response.use(
     const notify = useNotificationStore.getState().setNotification;
     const authStore = useAuthStore.getState();
 
-    notify(error.response?.data?.message || error.message, "error");
+    // If response is blob containing JSON error, parse it
+    if (error.response?.data && error.response.data instanceof Blob) {
+      const blob = error.response.data;
+      const text = await blob.text();
+      try {
+        const json = JSON.parse(text);
+        notify(json.message || error.message, "error");
+      } catch {
+        notify(error.message, "error");
+      }
+    } else {
+      notify(error.response?.data?.message || error.message, "error");
+    }
 
     const originalRequest = error.config;
 
@@ -80,13 +97,11 @@ api.interceptors.response.use(
 
         return api(originalRequest); // retry original request
       } catch {
-        // Refresh failed → logout
         authStore.clearAuth();
         return Promise.reject(error);
       }
     }
 
-    // Logout on 401 if not refreshable
     if (error.response?.status === 401) {
       authStore.clearAuth();
     }
