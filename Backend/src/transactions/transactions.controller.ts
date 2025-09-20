@@ -19,6 +19,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { Transactions } from './transactions.entity';
 import { ApiResponse } from 'src/common/types/api-response.type';
+import { BulkTransactionDto } from './dto/bulk-transaction.dto';
 
 @Controller('transactions')
 @UseGuards(AuthGuard('jwt'))
@@ -39,6 +40,28 @@ export class TransactionsController {
       success: true,
       message: 'Transaction created successfully',
       data: transaction,
+    };
+  }
+
+  /** Bulk create transactions */
+  @Post('bulk')
+  async createBulk(
+    @GetUser() user: User,
+    @Body() bulkTransactionDto: BulkTransactionDto,
+  ) {
+    const { date, type, transactions } = bulkTransactionDto;
+
+    const createdTransactions = await this.transactionsService.createBulk(
+      user,
+      type,
+      date,
+      transactions,
+    );
+
+    return {
+      success: true,
+      message: `${createdTransactions.length} transactions created successfully`,
+      data: createdTransactions,
     };
   }
 

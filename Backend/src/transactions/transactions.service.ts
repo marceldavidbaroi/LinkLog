@@ -121,4 +121,31 @@ export class TransactionsService {
     Object.assign(transaction, updateTransactionDto);
     return this.transactionsRepository.save(transaction);
   }
+
+  /** Bulk create transactions with dynamic descriptions */
+  async createBulk(
+    user: User,
+    type: 'income' | 'expense',
+    date: string | Date,
+    transactions: { category: string; amount: number }[],
+  ): Promise<Transactions[]> {
+    if (!transactions?.length) return [];
+
+    const txDate = new Date(date);
+    const dateStr = txDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const descriptionPrefix = type.charAt(0).toUpperCase() + type.slice(1); // Income / Expense
+
+    const created = transactions.map((t) =>
+      this.transactionsRepository.create({
+        type,
+        category: t.category,
+        amount: t.amount,
+        date: txDate,
+        description: `${descriptionPrefix} for ${dateStr}`,
+        user: { id: user.id },
+      } as Partial<Transactions>),
+    );
+
+    return this.transactionsRepository.save(created);
+  }
 }
