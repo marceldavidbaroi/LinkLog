@@ -1,7 +1,10 @@
 import type { ApiResponse } from "../../../types/api-response.type";
 import Api from "../api/transactionsApi";
 import { useTransactionsStore } from "../store/transactionsStore";
-import type { Transaction } from "../types/Transaction.type";
+import type {
+  BulkTransactionPayload,
+  Transaction,
+} from "../types/Transaction.type";
 
 export const useTransactions = () => {
   const {
@@ -21,6 +24,19 @@ export const useTransactions = () => {
       setTransaction(data || null);
 
       if (data) setTransactionList([data, ...transactionList]);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const bulk = async (payload: Partial<BulkTransactionPayload>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data }: ApiResponse<Transaction> = await Api.bulk(payload);
+      return data;
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -102,5 +118,6 @@ export const useTransactions = () => {
     getById,
     update,
     remove,
+    bulk,
   };
 };

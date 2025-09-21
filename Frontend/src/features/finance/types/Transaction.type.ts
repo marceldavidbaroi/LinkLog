@@ -83,6 +83,17 @@ export const recurringIntervals: RecurringInterval[] = [
   "yearly",
 ];
 
+export type TransactionItem = {
+  category: IncomeCategory | ExpenseCategory;
+  amount: number;
+};
+
+export type BulkTransactionPayload = {
+  date: string; // ISO date string
+  type: TransactionType;
+  transactions: TransactionItem[];
+};
+
 export interface FindTransactionsParams {
   type?: TransactionType;
   category?: IncomeCategory | ExpenseCategory;

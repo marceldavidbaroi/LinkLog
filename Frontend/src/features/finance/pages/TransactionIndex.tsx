@@ -31,6 +31,7 @@ import {
   type ExpenseCategory,
   incomeCategoriesList,
   expenseCategoriesList,
+  type BulkTransactionPayload,
 } from "../types/Transaction.type";
 
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -39,8 +40,9 @@ import TransactionDialog from "../components/TransactionDetailsDialog";
 import TransactionFormDialog from "../components/TransactionFormDialog";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { formatDate } from "../../../utils/convert";
+import BulkTransactionDialog from "../components/BulkTransactionDialog";
 const TransactionsIndex = () => {
-  const { getAll, getById, create, update, remove } = useTransactions();
+  const { getAll, getById, create, update, remove, bulk } = useTransactions();
   const transactionStore = useTransactionsStore();
 
   const [pagination, setPagination] = useState({ page: 0, pageSize: 25 });
@@ -48,6 +50,7 @@ const TransactionsIndex = () => {
   const [filters, setFilters] = useState<FindTransactionsParams>({});
   const [dialogFormOpen, setDialogFormOpen] = useState(false);
   const [dialogDetailsOpen, setDialogDetailsOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState<
     number | null
@@ -154,6 +157,12 @@ const TransactionsIndex = () => {
     setPagination({ page: 0, pageSize: parseInt(event.target.value, 10) });
   };
 
+  const handleBulkSave = async (data: BulkTransactionPayload) => {
+    console.log(data);
+    await bulk(data);
+    fetchTransactions();
+  };
+
   return (
     <Paper sx={{ width: "100%", p: 2, boxShadow: "none" }}>
       <Typography
@@ -167,7 +176,7 @@ const TransactionsIndex = () => {
       >
         Transactions
       </Typography>
-      <Box display="flex" justifyContent="flex-end" mt={2}>
+      <Box display="flex" justifyContent="flex-end" my={2}>
         <Button
           variant="contained"
           color="primary"
@@ -175,6 +184,14 @@ const TransactionsIndex = () => {
           startIcon={<AddIcon />}
         >
           Add Transaction
+        </Button>
+
+        <Button
+          variant="outlined"
+          onClick={() => setBulkDialogOpen(true)}
+          sx={{ ml: 1 }}
+        >
+          Add Bulk Transactions
         </Button>
       </Box>
 
@@ -356,6 +373,11 @@ const TransactionsIndex = () => {
         open={dialogDeleteOpen}
         onCancel={() => setDialogDeleteOpen(false)}
         onConfirm={handleConfirmDelete}
+      />
+      <BulkTransactionDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
+        onSave={handleBulkSave}
       />
     </Paper>
   );

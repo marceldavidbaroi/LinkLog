@@ -4,12 +4,18 @@ import type {
   FindTransactionsParams,
   Transaction,
   TransactionSummary,
+  BulkTransactionPayload,
 } from "../types/Transaction.type";
 
 const create = async (
   payload: Partial<Transaction>
 ): Promise<ApiResponse<Transaction>> => {
   return await api.post("/transactions", payload);
+};
+const bulk = async (
+  payload: Partial<BulkTransactionPayload>
+): Promise<ApiResponse<Transaction[]>> => {
+  return await api.post("/transactions/bulk", payload);
 };
 const getAll = async (
   query: FindTransactionsParams
@@ -41,6 +47,7 @@ const Api = {
   update,
   remove,
   overview,
+  bulk,
 };
 
 export default Api;
