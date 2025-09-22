@@ -1,4 +1,4 @@
-# Personal Finance App
+# MindVault
 
 Run the project:
 
