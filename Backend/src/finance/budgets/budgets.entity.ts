@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/auth/user.entity';
-import { ExpenseCategory } from 'src/transactions/transactions.enum';
+import { ExpenseCategory } from 'src/finance/transactions/transactions.enum';
 
 @Entity('budgets')
 export class Budgets {

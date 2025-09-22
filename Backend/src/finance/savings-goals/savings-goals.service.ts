@@ -6,12 +6,12 @@ import { CreateSavingsGoalDto } from './dto/create-savings-goals.dto';
 import { UpdateSavingsGoalDto } from './dto/update-savings-goals.dto';
 import { FindSavingsGoalsDto } from './dto/find-savings-goal.dto';
 import { User } from 'src/auth/user.entity';
-import { TransactionsService } from 'src/transactions/transactions.service';
-import { CreateTransactionDto } from 'src/transactions/dto/create-transaction.dto';
+import { TransactionsService } from 'src/finance/transactions/transactions.service';
+import { CreateTransactionDto } from 'src/finance/transactions/dto/create-transaction.dto';
 import {
   TransactionType,
   ExpenseCategory,
-} from 'src/transactions/transactions.enum';
+} from 'src/finance/transactions/transactions.enum';
 
 @Injectable()
 export class SavingsGoalsService {

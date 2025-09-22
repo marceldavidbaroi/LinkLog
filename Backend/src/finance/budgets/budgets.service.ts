@@ -6,7 +6,7 @@ import { CreateBudgetDto } from './dto/create-budget.dto';
 import { User } from 'src/auth/user.entity';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { FindBudgetsDto } from './dto/find-budget.dto';
-import { Transactions } from 'src/transactions/transactions.entity';
+import { Transactions } from 'src/finance/transactions/transactions.entity';
 
 @Injectable()
 export class BudgetsService {

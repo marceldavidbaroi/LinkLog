@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsInt, IsPositive, Min, Max } from 'class-validator';
-import { ExpenseCategory } from 'src/transactions/transactions.enum';
+import { ExpenseCategory } from 'src/finance/transactions/transactions.enum';
 
 export class CreateBudgetDto {
   @IsEnum(ExpenseCategory)

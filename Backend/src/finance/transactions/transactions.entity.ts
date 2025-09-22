@@ -7,14 +7,14 @@ import {
   ManyToOne,
   Index,
 } from 'typeorm';
-import { User } from '../auth/user.entity';
+import { User } from 'src/auth/user.entity';
 import {
   TransactionType,
   IncomeCategory,
   ExpenseCategory,
   RecurringInterval,
 } from './transactions.enum';
-import { SavingsGoals } from 'src/savings-goals/savings-goals.entity';
+import { SavingsGoals } from 'src/finance/savings-goals/savings-goals.entity';
 
 @Entity('transactions')
 @Index('idx_user_date', ['user', 'date']) // For monthly/period queries

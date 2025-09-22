@@ -1,5 +1,5 @@
 import { User } from 'src/auth/user.entity';
-import { Transactions } from 'src/transactions/transactions.entity';
+import { Transactions } from 'src/finance/transactions/transactions.entity';
 import {
   Column,
   Entity,

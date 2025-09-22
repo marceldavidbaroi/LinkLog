@@ -10,10 +10,10 @@ import {
 } from 'typeorm';
 import { Interactions } from 'src/interactions/interactions.entity';
 import { UserPreferences } from './userPreferences.entity';
-import { Transactions } from 'src/transactions/transactions.entity';
-import { Budgets } from 'src/budgets/budgets.entity';
-import { SavingsGoals } from 'src/savings-goals/savings-goals.entity';
-import { Reports } from 'src/reports/reports.entity';
+import { Transactions } from 'src/finance/transactions/transactions.entity';
+import { Budgets } from 'src/finance/budgets/budgets.entity';
+import { SavingsGoals } from 'src/finance/savings-goals/savings-goals.entity';
+import { Reports } from 'src/finance/reports/reports.entity';
 
 @Entity()
 export class User extends BaseEntity {

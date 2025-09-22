@@ -3,8 +3,8 @@ import { BudgetsService } from './budgets.service';
 import { BudgetsController } from './budgets.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Budgets } from './budgets.entity';
-import { TransactionsModule } from 'src/transactions/transactions.module';
-import { Transactions } from 'src/transactions/transactions.entity';
+import { TransactionsModule } from 'src/finance/transactions/transactions.module';
+import { Transactions } from 'src/finance/transactions/transactions.entity';
 
 @Module({
   imports: [

@@ -3,15 +3,13 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reports, ReportType } from './reports.entity';
 import { User } from 'src/auth/user.entity';
-import { TransactionsService } from 'src/transactions/transactions.service';
-import { ExportFormat } from './reports.enum';
-import { ReportExport } from 'src/utils/report-export';
+import { TransactionsService } from 'src/finance/transactions/transactions.service';
 import {
   ExpenseCategory,
   TransactionType,
-} from 'src/transactions/transactions.enum';
-import { BudgetsService } from 'src/budgets/budgets.service';
-import { SavingsGoalsService } from 'src/savings-goals/savings-goals.service';
+} from 'src/finance/transactions/transactions.enum';
+import { BudgetsService } from 'src/finance/budgets/budgets.service';
+import { SavingsGoalsService } from 'src/finance/savings-goals/savings-goals.service';
 
 @Injectable()
 export class ReportsService {

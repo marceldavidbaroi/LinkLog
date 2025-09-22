@@ -7,17 +7,13 @@ import {
   Query,
   Body,
   Patch,
-  ParseEnumPipe,
   ParseIntPipe,
-  Res,
-  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/auth/user.entity';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { ExportFormat } from './reports.enum';
 import { FilterReportsDto } from './dto/filter-reports.dto';
 import { CreateReportDto } from './dto/create-report.dto';
 

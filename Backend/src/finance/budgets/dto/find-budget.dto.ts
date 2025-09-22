@@ -1,6 +1,6 @@
 import { IsEnum, IsInt, IsOptional, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ExpenseCategory } from 'src/transactions/transactions.enum';
+import { ExpenseCategory } from 'src/finance/transactions/transactions.enum';
 
 export class FindBudgetsDto {
   @IsOptional()

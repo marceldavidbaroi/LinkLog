@@ -3,9 +3,9 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Reports } from './reports.entity';
-import { TransactionsModule } from 'src/transactions/transactions.module';
-import { BudgetsModule } from 'src/budgets/budgets.module';
-import { SavingsGoalsModule } from 'src/savings-goals/savings-goals.module';
+import { TransactionsModule } from 'src/finance/transactions/transactions.module';
+import { BudgetsModule } from 'src/finance/budgets/budgets.module';
+import { SavingsGoalsModule } from 'src/finance/savings-goals/savings-goals.module';
 
 @Module({
   imports: [
