@@ -26,3 +26,12 @@ Parent module for all financial operations.
 Contains submodules like Transactions, Dashboard, Budgeting, Savings Goals, and Reports.
 
 [Go to Finance Documentation →](/docs/Backend/Overview/Finance)
+
+---
+
+## Modules Module
+
+Acts as a central registry of all modules in the system.  
+Stores each module’s **name** and its **parent module** to support features like tag separation, categorization, and cross-referencing between modules.
+
+[Go to Modules Documentation →](/docs/Backend/Overview/Modules)

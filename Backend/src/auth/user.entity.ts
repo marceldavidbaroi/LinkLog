@@ -8,7 +8,6 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Interactions } from 'src/interactions/interactions.entity';
 import { UserPreferences } from './userPreferences.entity';
 import { Transactions } from 'src/finance/transactions/transactions.entity';
 import { Budgets } from 'src/finance/budgets/budgets.entity';
@@ -36,9 +35,6 @@ export class User extends BaseEntity {
   createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @OneToMany(() => Interactions, (interaction) => interaction.user)
-  interactions: Interactions[];
 
   @OneToOne(() => UserPreferences, (pref) => pref.user, { cascade: true })
   preferences: UserPreferences;
