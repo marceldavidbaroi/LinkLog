@@ -35,3 +35,17 @@ Acts as a central registry of all modules in the system.
 Stores each module’s **name** and its **parent module** to support features like tag separation, categorization, and cross-referencing between modules.
 
 [Go to Modules Documentation →](/docs/Backend/Overview/Modules)
+
+---
+
+## Tags Module
+
+Responsible for managing tags that categorize and organize contacts and other module-specific data.  
+Supports both **system-defined tags** and **user-created custom tags**.
+
+- Predefined **system tags** that cannot be modified by users.
+- Allows users to create **custom tags** with optional colors and descriptions.
+- Each tag is associated with a **module_name** (e.g., `contacts`) for contextual relevance.
+- Tracks timestamps (`created_at` and `updated_at`) for auditing purposes.
+
+[Go to Tags Documentation →](/docs/Backend/Overview/Tags)
