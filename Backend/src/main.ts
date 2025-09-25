@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser'; // ✅ default import
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001'];
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +21,16 @@ async function bootstrap() {
 
   // ✅ Enable CORS for frontend with cookies
   app.enableCors({
-    origin: 'http://localhost:5173', // your frontend
+    origin: (origin, callback) => {
+      // allow requests with no origin (like curl or Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true); // allow this origin
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true, // needed for cookies
   });
 
