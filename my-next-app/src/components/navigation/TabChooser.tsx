@@ -55,7 +55,7 @@ export default function TabChooser({ root, tabs }: TabChooserProps) {
                 backdropFilter: "blur(8px)",
                 // Reverse colors on active
                 backgroundColor: active
-                  ? theme.palette.secondary.main // active background = primary
+                  ? theme.palette.primary.main // active background = primary
                   : theme.palette.background.default, // inactive background = default
                 color: active
                   ? theme.palette.background.default // active text = background color
@@ -64,7 +64,7 @@ export default function TabChooser({ root, tabs }: TabChooserProps) {
                 transition: "all 0.25s ease",
                 "&:hover": {
                   backgroundColor: active
-                    ? theme.palette.secondary.dark
+                    ? theme.palette.primary.dark
                     : theme.palette.grey[100],
                 },
                 "&:first-of-type": {

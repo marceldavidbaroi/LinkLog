@@ -51,12 +51,7 @@ export default function FloatingNavbar({
       }}
     >
       <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-        }}
+        sx={{ display: "flex", alignItems: "center", position: "relative" }}
       >
         {/* Left: Company */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -67,13 +62,17 @@ export default function FloatingNavbar({
         </Box>
 
         {/* Center: Navigation */}
-        {!isMobile ? (
+        {!isMobile && (
           <Box
             sx={{
+              position: "absolute",
+              left: "50%",
+              top: 0,
+              bottom: 0,
               display: "flex",
-              gap: 3,
               alignItems: "center",
-              justifyContent: "center",
+              gap: 3,
+              transform: "translateX(-50%)",
             }}
           >
             {navLinks.map((link, idx) => (
@@ -84,14 +83,28 @@ export default function FloatingNavbar({
               />
             ))}
           </Box>
-        ) : (
-          <IconButton sx={{ color: "#fff" }} onClick={onMenuClick}>
-            <MenuIcon />
-          </IconButton>
         )}
 
-        {/* Right: Clock */}
-        {!isMobile && <ClockDisplay time={time} />}
+        {/* Right: Clock or Menu */}
+        <Box
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            pr: 2,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {!isMobile ? (
+            <ClockDisplay time={time} />
+          ) : (
+            <IconButton sx={{ color: "#fff" }} onClick={onMenuClick}>
+              <MenuIcon />
+            </IconButton>
+          )}
+        </Box>
       </Toolbar>
     </Paper>
   );
