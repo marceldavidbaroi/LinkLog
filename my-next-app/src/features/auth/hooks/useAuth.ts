@@ -17,16 +17,15 @@ export const useAuth = () => {
   } = useAuthStore();
 
   // helper to handle API calls with loading and error
-  const handleAuthRequest = async (
-    request: () => Promise<ApiResponse<LoginResponse>>
-  ) => {
+  const handleAuthRequest = async (request: () => Promise<LoginResponse>) => {
     setLoading(true);
     setError(null);
 
     try {
       const data = await request();
-      setUser(data?.data?.user || null);
-      setToken(data?.data?.accessToken || null);
+      console.log(data);
+      setUser(data?.user || null);
+      setToken(data?.accessToken || null);
       return data; // store access token in memory
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);

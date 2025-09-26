@@ -6,7 +6,7 @@ const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null, // access token in memory (now persisted too)
+      token: null,
       loading: false,
       error: null,
 
@@ -17,9 +17,11 @@ const useAuthStore = create<AuthState>()(
       clearAuth: () => set({ user: null, token: null, error: null }),
     }),
     {
-      name: "auth-storage", // key in localStorage
-      // optional: choose what to persist
+      name: "auth-storage",
       partialize: (state) => ({ user: state.user, token: state.token }),
+      onRehydrateStorage: () => (state) => {
+        console.log("✅ Hydrated with:", state);
+      },
     }
   )
 );
