@@ -71,7 +71,12 @@ export default function ProtectedLayout({
       {/* Main content */}
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, mt: { xs: "90px", md: "120px" } }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          px: 4,
+          mt: { xs: "90px", md: "120px" },
+        }}
       >
         {children}
       </Box>
