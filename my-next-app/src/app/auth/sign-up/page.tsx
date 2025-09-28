@@ -17,8 +17,12 @@ import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "@/theme";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+
 
 const SignUpPage = () => {
+  const { signup, loading, error, token } = useAuth();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -45,6 +49,9 @@ const SignUpPage = () => {
     if (Object.keys(newErrors).length === 0) {
       console.log("Username:", username, "Password:", password);
       // Add signup logic here
+      try{
+        signup({username,password})
+      }catch{}
     }
   };
 

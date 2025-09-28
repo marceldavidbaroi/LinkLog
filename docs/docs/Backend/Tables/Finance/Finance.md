@@ -1,93 +1,65 @@
-## Relationships
+# Implementation Roadmap for Scalable Finance Schema Refactor
 
-- **Users → Transactions** = 1:N
-- **Users → Budgets** = 1:N
-- **Users → Savings Goals** = 1:N
-- **Savings Goals → Transactions** = 1:N
-- **Users → Reports** = 1:N
-
-## Transactions Table
-
-Tracks income and expenses.
-
-| Column Name        | Type              | Description                                    |
-| ------------------ | ----------------- | ---------------------------------------------- |
-| id                 | int               | Primary key                                    |
-| user_id            | int               | Foreign key → Users                            |
-| type               | enum              | `'income'` or `'expense'`                      |
-| category           | enum or varchar   | Income or Expense category                     |
-| amount             | decimal           | Transaction amount                             |
-| date               | date or timestamp | Transaction date                               |
-| description        | text              | Optional notes                                 |
-| recurring          | boolean           | True if recurring                              |
-| recurring_interval | enum              | `'daily'`, `'weekly'`, `'monthly'`, `'yearly'` |
-| created_at         | timestamp         | Record creation                                |
-| updated_at         | timestamp         | Record update                                  |
-
-### 📝 Enum Notes
-
-- **type**
-
-  - `income`
-  - `expense`
-
-- **category**
-
-  - **Income categories:**  
-    `salary`, `freelance`, `business`, `investment`, `rental_income`, `gift`, `refund`, `other_income`
-  - **Expense categories:**  
-    `food_groceries`, `food_dining`, `housing_rent`, `housing_mortgage`, `utilities`, `transportation`, `health_medical`, `education`, `entertainment`, `shopping`, `travel`, `personal_care`, `insurance`, `debt_repayment`, `savings_investments`, `charity_donation`, `other_expense`
-
-- **recurring_interval**  
-  `daily`, `weekly`, `monthly`, `yearly`
+This roadmap outlines a four-phase plan to implement the critical schema changes, including the new **Categories table** and the **three Materialized Views (Summary Tables)**. The plan prioritizes setting up the necessary infrastructure, then establishing the data integrity pipeline, and finally refactoring the read-heavy features for maximum performance.
 
 ---
 
-## Budgets Table
+## Phase 0: Setup and Preparation
 
-Tracks monthly budgets per category.
+The goal is to create the necessary code modules and set up initial data structures without affecting existing features.
 
-| Column Name | Type            | Description         |
-| ----------- | --------------- | ------------------- |
-| id          | int             | Primary key         |
-| user_id     | int             | Foreign key → Users |
-| category    | enum or varchar | Budget category     |
-| amount      | decimal         | Budgeted amount     |
-| month       | int             | 1–12                |
-| year        | int             | e.g., 2025          |
-| created_at  | timestamp       | Record creation     |
-| updated_at  | timestamp       | Record update       |
+| Step    | Task                            | Target Module(s)   | Notes                                                                                                                                                           |
+| :------ | :------------------------------ | :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0.1** | **Create `CategoriesModule`**   | `CategoriesModule` | Define the `Categories` entity and repository. **Pre-populate** this table with all system/default income and expense categories.                               |
+| **0.2** | **Create `SummaryModule`**      | `SummaryModule`    | Define the three new entities (`daily_summary`, `monthly_summary`, `category_monthly_summary`) and their repositories. Create the basic `SummaryService` shell. |
+| **0.3** | **Set `DATE` type consistency** | All Tables         | Ensure all date columns (`Transactions.date`, `Reports.period_start`, etc.) are consistently using the SQL **`DATE`** type (YYYY-MM-DD format).                 |
 
 ---
 
-## Savings Goals Table
+## Phase 1: Database Refactoring & Data Migration 💾
 
-Tracks goals and progress.
+This phase involves the critical structural changes to the database and requires careful data migration.
 
-| Column Name   | Type      | Description                                |
-| ------------- | --------- | ------------------------------------------ |
-| id            | int       | Primary key                                |
-| user_id       | int       | Foreign key → Users                        |
-| name          | varchar   | Goal name (e.g., Vacation)                 |
-| target_amount | decimal   | Amount to save                             |
-| saved_amount  | decimal   | Current saved amount                       |
-| priority      | varchar   | Optional priority: `HIGH`, `MEDIUM`, `LOW` |
-| due_date      | date      | Optional target date                       |
-| created_at    | timestamp | Record creation                            |
-| updated_at    | timestamp | Record update                              |
+| Step    | Task                                     | Target Tables                                                                | Rationale                                                                                                                                                                                    |
+| :------ | :--------------------------------------- | :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1.1** | **Deploy New Tables**                    | `Categories`, `daily_summary`, `monthly_summary`, `category_monthly_summary` | Deploy all 4 new tables with their defined Primary Keys and **Composite Indexes**.                                                                                                           |
+| **1.2** | **Migrate Category Data (Crucial Step)** | `Transactions`, `Budgets`                                                    | 1. Add the new **`category_id`** column (`INT`) to both tables. 2. Run a migration script: Map existing string/enum category values to the corresponding `id` in the new `Categories` table. |
+| **1.3** | **Remove Legacy Column**                 | `Transactions`, `Budgets`                                                    | Once migration is verified, **drop the old `category` column** to enforce the new foreign key relationship.                                                                                  |
 
 ---
 
-## Reports Table (Optional)
+## Phase 2: Implementing the Write Path (Data Integrity) ✍️
 
-Stores cached reports for faster PDF export or analytics.
+This phase establishes the **data integrity pipeline**, shifting the computational load from read queries to write operations by updating the materialized views.
 
-| Column Name  | Type         | Description                              |
-| ------------ | ------------ | ---------------------------------------- |
-| id           | int          | Primary key                              |
-| user_id      | int          | Foreign key → Users                      |
-| report_type  | enum         | `'monthly'`, `'half_yearly'`, `'yearly'` |
-| period_start | date         | Start of report period                   |
-| period_end   | date         | End of report period                     |
-| data         | JSON or text | Precomputed report data                  |
-| created_at   | timestamp    | Record creation                          |
+| Step    | Task                               | Target Module(s)      | Rationale                                                                                                                                                                                 |
+| :------ | :--------------------------------- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **2.1** | **Develop `SummaryService` Logic** | `SummaryService`      | Implement the upsert logic for the three core methods (`updateDailySummary`, `updateMonthlySummary`, `updateCategoryMonthlySummary`). This includes recalculating the `net_savings_rate`. |
+| **2.2** | **Hook into Transactions Service** | `TransactionsService` | Import and inject `SummaryService`. Modify the `create`, `update`, and `delete` methods to call the corresponding `SummaryService` methods _immediately after_ the database change.       |
+| **2.3** | **Refactor Savings Goals Hook**    | `SavingsGoalsService` | Ensure any method that alters a transaction related to a savings goal (like adding a contribution) correctly triggers the `TransactionsService` hook.                                     |
+| **2.4** | **Initial Summary Backfill**       | N/A                   | Run a **one-time backfill script** to aggregate all historical transactions and fully populate the three summary tables.                                                                  |
+
+---
+
+## Phase 3: Performance Refactoring (The Read Path) 📈
+
+This phase refactors the high-traffic features to read exclusively from the fast, pre-aggregated summary tables.
+
+| Step    | Task                           | Target Module(s)          | Performance Benefit                                                                                                                                                   |
+| :------ | :----------------------------- | :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **3.1** | **Refactor Budget Alerts**     | `BudgetsService`          | Change `getBudgetAlerts()` to query **`category_monthly_summary`** directly to get total spending per category for the current period (solves the N+1 query problem). |
+| **3.2** | **Refactor Dashboard Metrics** | `FinanceDashboardService` | Rewrite all summary metrics (Daily totals, MoM comparison, Net Savings Rate) to read from **`daily_summary` and `monthly_summary`**.                                  |
+| **3.3** | **Refactor Reporting Engine**  | `ReportsService`          | Change report generation to pull aggregated figures and time-series data from the summary tables instead of joining and summing the large `Transactions` table.       |
+| **3.4** | **Testing & Benchmarking**     | All Modules               | Execute load tests to verify the dramatic performance improvements on Dashboard and Report endpoints.                                                                 |
+
+---
+
+## Phase 4: New Feature & Rollout ✨
+
+The final phase implements the flexibility feature enabled by the new schema and prepares for deployment.
+
+| Step    | Task                               | Target Module(s)   | Objective                                                                                                                                                    |
+| :------ | :--------------------------------- | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **4.1** | **Implement Custom Category CRUD** | `CategoriesModule` | Build the API endpoints for users to **create, read, update, and delete custom categories** (managing rows where `Categories.user_id` is present).           |
+| **4.2** | **Update UI/UX**                   | Frontend           | Update all forms (Transaction entry, Budget setup) to select categories using the new **`category_id`** foreign key and display the flexible `display_name`. |
+| **4.3** | **Final End-to-End QA**            | All Modules        | Comprehensive testing to confirm that the new write path is stable and that all API response times meet the performance targets.                             |
