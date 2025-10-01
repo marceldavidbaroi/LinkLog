@@ -5,6 +5,8 @@ import { BudgetsModule } from './budgets/budgets.module';
 import { FinanceDashboardModule } from './finance-dashboard/finance-dashboard.module';
 import { ReportsModule } from './reports/reports.module';
 import { SavingsGoalsModule } from './savings-goals/savings-goals.module';
+import { CategoriesModule } from './categories/categories.module';
+import { SummaryModule } from './summary/summary.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { SavingsGoalsModule } from './savings-goals/savings-goals.module';
     FinanceDashboardModule,
     ReportsModule,
     SavingsGoalsModule,
+    CategoriesModule,
+    SummaryModule,
   ],
   exports: [
     TransactionsModule,

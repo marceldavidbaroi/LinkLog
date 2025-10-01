@@ -6,45 +6,39 @@ import {
   UpdateDateColumn,
   ManyToOne,
   Index,
+  JoinColumn,
 } from 'typeorm';
 import { User } from 'src/auth/user.entity';
-import {
-  TransactionType,
-  IncomeCategory,
-  ExpenseCategory,
-  RecurringInterval,
-} from './transactions.enum';
-import { SavingsGoals } from 'src/finance/savings-goals/savings-goals.entity';
+import { Category } from 'src/finance/categories/categories.entity';
+
+export type TransactionType = 'income' | 'expense';
+export type RecurringInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 @Entity('transactions')
-@Index('idx_user_date', ['user', 'date']) // For monthly/period queries
-@Index('idx_user_category_date', ['user', 'category', 'date']) // For category reports per period
-@Index('idx_user_recurring', ['user', 'recurring']) // For fetching recurring txns by user
+@Index('idx_user_date', ['user', 'date']) // For period queries
+@Index('idx_user_category_date', ['user', 'category', 'date']) // For category reports
+@Index('idx_user_recurring', ['user', 'recurring']) // For recurring transactions
 export class Transactions {
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
-  @Index() // Explicit index on user_id (foreign key)
+  @Index()
   user: User;
 
-  @Column({
-    type: 'enum',
-    enum: TransactionType,
-  })
+  @Column({ type: 'enum', enum: ['income', 'expense'] })
   type: TransactionType;
 
-  @Column({
-    type: 'enum',
-    enum: [...Object.values(IncomeCategory), ...Object.values(ExpenseCategory)],
-  })
-  category: IncomeCategory | ExpenseCategory;
+  @ManyToOne(() => Category, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'category_id' })
+  @Index()
+  category: Category;
 
-  @Column('decimal', { precision: 12, scale: 2 })
+  @Column('decimal', { precision: 18, scale: 2 })
   amount: number;
 
-  @Column({ type: 'timestamp' })
-  date: Date;
+  @Column({ type: 'date' })
+  date: string; // YYYY-MM-DD
 
   @Column({ type: 'text', nullable: true })
   description?: string;
@@ -54,22 +48,15 @@ export class Transactions {
 
   @Column({
     type: 'enum',
-    enum: RecurringInterval,
+    enum: ['daily', 'weekly', 'monthly', 'yearly'],
     nullable: true,
     name: 'recurring_interval',
   })
   recurringInterval?: RecurringInterval;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ type: 'timestamp with time zone', name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ type: 'timestamp with time zone', name: 'updated_at' })
   updatedAt: Date;
-
-  @ManyToOne(() => SavingsGoals, (goal) => goal.transactions, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  @Index() // Explicit index on savings_goal_id (foreign key)
-  savingsGoal: SavingsGoals;
 }

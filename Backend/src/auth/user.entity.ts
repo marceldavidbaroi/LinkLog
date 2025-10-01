@@ -13,6 +13,10 @@ import { Transactions } from 'src/finance/transactions/transactions.entity';
 import { Budgets } from 'src/finance/budgets/budgets.entity';
 import { SavingsGoals } from 'src/finance/savings-goals/savings-goals.entity';
 import { Reports } from 'src/finance/reports/reports.entity';
+import { Category } from 'src/finance/categories/categories.entity';
+import { DailySummary } from 'src/finance/summary/daily_summary.entity';
+import { MonthlySummary } from 'src/finance/summary/monthly_summary.entity';
+import { MonthlyCategorySummary } from 'src/finance/summary/category_monthly_summary.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -50,4 +54,19 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Reports, (report) => report.user)
   reports: Reports[];
+
+  @OneToMany(() => Category, (categories) => categories.user)
+  categories: Category[];
+
+  @OneToMany(() => DailySummary, (daily_summary) => daily_summary.user)
+  dailySummaries: DailySummary[];
+
+  @OneToMany(() => MonthlySummary, (monthly_summary) => monthly_summary.user)
+  monthlySummaries: MonthlySummary[];
+
+  @OneToMany(
+    () => MonthlyCategorySummary,
+    (monthly_category_summary) => monthly_category_summary.user,
+  )
+  monthlyCategorySummaries: MonthlyCategorySummary[];
 }

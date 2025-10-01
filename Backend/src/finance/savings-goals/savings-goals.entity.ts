@@ -49,12 +49,9 @@ export class SavingsGoals {
   @Column({ type: 'date', nullable: true, name: 'due_date' })
   dueDate: Date;
 
-  @OneToMany(() => Transactions, (transaction) => transaction.savingsGoal)
-  transactions: Transactions[];
-
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ type: 'time without time zone', name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ type: 'time without time zone', name: 'updated_at' })
   updatedAt: Date;
 }
