@@ -1,11 +1,19 @@
-import { IsEnum, IsInt, IsOptional, Min, Max } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  Min,
+  Max,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { ExpenseCategory } from 'src/finance/transactions/transactions.enum';
 
 export class FindBudgetsDto {
   @IsOptional()
-  @IsEnum(ExpenseCategory)
-  category?: ExpenseCategory;
+  @IsNumber({}, { message: 'Category must be a valid ID' })
+  @IsNotEmpty({ message: 'Category ID is required' })
+  categoryId: number;
 
   @IsOptional()
   @IsInt()

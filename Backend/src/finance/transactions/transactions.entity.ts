@@ -23,6 +23,7 @@ export class Transactions {
   id: number;
 
   @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   @Index()
   user: User;
 

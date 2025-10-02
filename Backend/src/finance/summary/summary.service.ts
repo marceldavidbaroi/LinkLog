@@ -149,53 +149,45 @@ export class SummaryService {
     }
   }
 
-  /** Recalculates and upserts the Daily Summary for a specific date and user. */
-  // Inside SummaryService
-
-  private async updateDailySummary(
-    dateStr: string,
-    userId: number,
-  ): Promise<void> {
+  private async updateDailySummary(dateStr: string, userId: number) {
     const totalResult = await this.transactionsRepository
       .createQueryBuilder('t')
       .select(
         'SUM(CASE WHEN t.type = :income THEN t.amount ELSE 0 END)',
-        'totalIncome',
+        'total_income',
       )
       .addSelect(
         'SUM(CASE WHEN t.type = :expense THEN t.amount ELSE 0 END)',
-        'totalExpense',
+        'total_expense',
       )
       .where('t.user_id = :userId', { userId })
       .andWhere('t.date = :date', { date: dateStr })
       .setParameters({ income: 'income', expense: 'expense' })
       .getRawOne();
 
-    // ⚡ FIX 1: Use repository.create() and pass relation ID in object form.
-    // ⚡ FIX 2: Ensure all values match the entity's column types (string for date and decimals).
-    const upsertData = this.dailySummaryRepository.create({
-      // 1. Pass the User ID inside the 'user' relation object
-      user: { id: userId },
-
-      // 2. Pass the date as the YYYY-MM-DD string format (as defined in your entity)
-      date: dateStr,
-
-      // 3. Convert numbers to strings with fixed precision for DECIMAL columns
-      totalIncome: (parseFloat(totalResult.totalIncome) || 0).toFixed(2),
-      totalExpense: (parseFloat(totalResult.totalExpense) || 0).toFixed(2),
-    });
-
-    // Save performs the upsert based on the unique index [user, date].
-    await this.dailySummaryRepository.save(upsertData);
+    await this.dailySummaryRepository
+      .createQueryBuilder()
+      .insert()
+      .into(DailySummary)
+      .values({
+        user: { id: userId },
+        date: dateStr,
+        totalIncome: (parseFloat(totalResult.total_income) || 0).toFixed(2),
+        totalExpense: (parseFloat(totalResult.total_expense) || 0).toFixed(2),
+      })
+      .onConflict(
+        `("user_id", "date") DO UPDATE SET 
+      "total_income" = EXCLUDED."total_income",
+      "total_expense" = EXCLUDED."total_expense"`,
+      )
+      .execute();
   }
-  /** Recalculates and upserts the Monthly Summary for a specific month/year and user, including Net Savings Rate. */
-  // Inside SummaryService
 
   private async updateMonthlySummary(
     year: number,
     month: number,
     userId: number,
-  ): Promise<void> {
+  ) {
     const monthStart = new Date(year, month - 1, 1).toISOString().split('T')[0];
     const nextMonth = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
@@ -207,11 +199,11 @@ export class SummaryService {
       .createQueryBuilder('t')
       .select(
         'SUM(CASE WHEN t.type = :income THEN t.amount ELSE 0 END)',
-        'totalIncome',
+        'total_income',
       )
       .addSelect(
         'SUM(CASE WHEN t.type = :expense THEN t.amount ELSE 0 END)',
-        'totalExpense',
+        'total_expense',
       )
       .where('t.user_id = :userId', { userId })
       .andWhere('t.date >= :monthStart', { monthStart })
@@ -219,44 +211,35 @@ export class SummaryService {
       .setParameters({ income: 'income', expense: 'expense' })
       .getRawOne();
 
-    const totalIncome = parseFloat(totalResult.totalIncome) || 0;
-    const totalExpense = parseFloat(totalResult.totalExpense) || 0;
+    const totalIncome = parseFloat(totalResult.total_income) || 0;
+    const totalExpense = parseFloat(totalResult.total_expense) || 0;
 
-    let netSavingsRate = 0;
-    const netIncome = totalIncome - totalExpense;
-    if (totalIncome > 0) {
-      netSavingsRate = netIncome / totalIncome;
-    }
-
-    // ⚡ FIX 1: Use repository.create() for proper entity mapping.
-    // ⚡ FIX 2: Convert totals to strings with fixed precision (for DECIMAL columns).
-    const upsertData = this.monthlySummaryRepository.create({
-      // 1. Pass the User ID inside the 'user' relation object
-      user: { id: userId },
-
-      year,
-      month,
-
-      // 2. Convert amounts to strings with two decimals
-      totalIncome: totalIncome.toFixed(2),
-      totalExpense: totalExpense.toFixed(2),
-
-      // 3. NOTE: This must be uncommented once you add the column to the entity!
-      // netSavingsRate: netSavingsRate.toFixed(4),
-    });
-
-    // Save performs the upsert based on the unique index [user, year, month].
-    await this.monthlySummaryRepository.save(upsertData);
+    await this.monthlySummaryRepository
+      .createQueryBuilder()
+      .insert()
+      .into(MonthlySummary)
+      .values({
+        user: { id: userId },
+        year,
+        month,
+        totalIncome: totalIncome.toFixed(2),
+        totalExpense: totalExpense.toFixed(2),
+      })
+      .onConflict(
+        `("user_id", "year", "month") DO UPDATE SET 
+      "total_income" = EXCLUDED."total_income",
+      "total_expense" = EXCLUDED."total_expense"`,
+      )
+      .execute();
   }
 
-  /** Recalculates and upserts the Category Monthly Summary for a specific key set. */
   private async updateCategoryMonthlySummary(
     year: number,
     month: number,
     categoryId: number,
     type: 'income' | 'expense',
     userId: number,
-  ): Promise<void> {
+  ) {
     const monthStart = new Date(year, month - 1, 1).toISOString().split('T')[0];
     const nextMonth = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
@@ -266,7 +249,7 @@ export class SummaryService {
 
     const totalResult = await this.transactionsRepository
       .createQueryBuilder('t')
-      .select('SUM(t.amount)', 'totalAmount')
+      .select('SUM(t.amount)', 'total_amount')
       .where('t.user_id = :userId', { userId })
       .andWhere('t.category_id = :categoryId', { categoryId })
       .andWhere('t.type = :type', { type })
@@ -274,17 +257,22 @@ export class SummaryService {
       .andWhere('t.date < :monthEnd', { monthEnd })
       .getRawOne();
 
-    // Prepare the entity for upsert.
-    const upsertData = this.monthlyCategorySummaryRepository.create({
-      user: { id: userId },
-      year,
-      month,
-      category: { id: categoryId },
-      type,
-      totalAmount: (parseFloat(totalResult.totalAmount) || 0).toFixed(2),
-    });
-
-    // Performs an upsert based on the composite index.
-    await this.monthlyCategorySummaryRepository.save(upsertData);
+    await this.monthlyCategorySummaryRepository
+      .createQueryBuilder()
+      .insert()
+      .into(MonthlyCategorySummary)
+      .values({
+        user: { id: userId },
+        year,
+        month,
+        category: { id: categoryId },
+        type,
+        totalAmount: (parseFloat(totalResult.total_amount) || 0).toFixed(2),
+      })
+      .onConflict(
+        `("user_id", "year", "month", "category_id", "type") DO UPDATE SET 
+      "total_amount" = EXCLUDED."total_amount"`,
+      )
+      .execute();
   }
 }
