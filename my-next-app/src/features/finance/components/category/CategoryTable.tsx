@@ -4,59 +4,64 @@ import { useState, useEffect } from "react";
 import {
   Paper,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button,
+  ButtonGroup,
   Table,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
   TableContainer,
-  TablePagination,
   IconButton,
   Skeleton,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
+  EditOutlined as EditOutlinedIcon,
+  DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
 
 import CategoryFormDialog from "./CategoryFormDialog";
-
 import DeleteDialog from "@/components/DeleteDialog";
 import { useCategory } from "@/features/finance/hooks/categoryAuth";
 import { useCategoryStore } from "@/features/finance/store/categoryStore";
 
 export default function CategoryTable() {
   const categoryStore = useCategoryStore();
-  const { getAll, create, update, remove } = useCategory();
+  const { getAll, create, update, remove, getStats } = useCategory();
 
-  const [pagination, setPagination] = useState({ page: 0, pageSize: 25 });
-  const [totalRows, setTotalRows] = useState(0);
   const [filters, setFilters] = useState<{
     categoryType?: "income" | "expense";
+    ownership?: "system" | "user";
   }>({});
-
   const [dialogFormOpen, setDialogFormOpen] = useState(false);
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
   );
 
   const fetchCategories = async () => {
     const response = await getAll(filters);
-    const data = response?.data || [];
-    setTotalRows(data.length);
+    categoryStore.setCategoryList(response || []);
+  };
+
+  const getCategoryStatus = async () => {
+    await getStats();
+    console.log("category", categoryStore.categoryStatus);
   };
 
   useEffect(() => {
     fetchCategories();
-  }, [filters, pagination.page, pagination.pageSize]);
+  }, [filters]);
+
+  useEffect(() => {
+    getCategoryStatus();
+  }, []);
 
   const handleAdd = () => {
     setEditingCategory(null);
@@ -93,29 +98,26 @@ export default function CategoryTable() {
     }
   };
 
-  const handleTypeChange = (e: any) => {
-    setFilters({ categoryType: e.target.value || undefined });
-    setPagination({ ...pagination, page: 0 });
+  const handleTypeFilterChange = (type?: "income" | "expense") => {
+    setFilters((prev) => ({ ...prev, categoryType: type }));
   };
 
-  const handleChangePage = (_: any, newPage: number) => {
-    setPagination({ ...pagination, page: newPage });
-  };
-
-  const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPagination({ page: 0, pageSize: parseInt(e.target.value, 10) });
+  const handleOwnershipFilterChange = (ownership?: "system" | "user") => {
+    setFilters((prev) => ({ ...prev, ownership }));
   };
 
   return (
     <Paper
       sx={{ width: "100%", p: 2, boxShadow: "none", bgcolor: "transparent" }}
     >
+      {/* Header with Add Button and Filters */}
       <Box
         display="flex"
-        justifyContent="flex-end"
+        justifyContent="space-between"
+        alignItems="center"
         my={2}
-        gap={1}
         flexWrap="wrap"
+        gap={1}
       >
         <Button
           variant="contained"
@@ -125,23 +127,120 @@ export default function CategoryTable() {
         >
           Add Category
         </Button>
+        <Box display="flex" gap={1} flexWrap="wrap">
+          {/* Type Filter */}
+          <ButtonGroup>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleTypeFilterChange(undefined)}
+              sx={{
+                backgroundColor:
+                  filters.categoryType === undefined
+                    ? "secondary.main"
+                    : undefined,
+                fontWeight:
+                  filters.categoryType === undefined ? "bold" : undefined,
+                color: filters.categoryType === undefined ? "white" : undefined,
+              }}
+            >
+              All Types
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleTypeFilterChange("income")}
+              sx={{
+                backgroundColor:
+                  filters.categoryType === "income"
+                    ? "secondary.main"
+                    : undefined,
+                fontWeight:
+                  filters.categoryType === "income" ? "bold" : undefined,
+                color: filters.categoryType === "income" ? "white" : undefined,
+              }}
+            >
+              Income
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleTypeFilterChange("expense")}
+              sx={{
+                backgroundColor:
+                  filters.categoryType === "expense"
+                    ? "secondary.main"
+                    : undefined,
+                fontWeight:
+                  filters.categoryType === "expense" ? "bold" : undefined,
+                color: filters.categoryType === "expense" ? "white" : undefined,
+              }}
+            >
+              Expense
+            </Button>
+          </ButtonGroup>
+
+          {/* Ownership Filter */}
+          <ButtonGroup>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleOwnershipFilterChange(undefined)}
+              sx={{
+                backgroundColor:
+                  filters.ownership === undefined
+                    ? "secondary.main"
+                    : undefined,
+                fontWeight:
+                  filters.ownership === undefined ? "bold" : undefined,
+                color: filters.ownership === undefined ? "white" : undefined,
+              }}
+            >
+              All Ownership
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleOwnershipFilterChange("system")}
+              sx={{
+                backgroundColor:
+                  filters.ownership === "system" ? "secondary.main" : undefined,
+                fontWeight: filters.ownership === "system" ? "bold" : undefined,
+                color: filters.ownership === "system" ? "white" : undefined,
+              }}
+            >
+              System
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={categoryStore.loading}
+              loadingPosition="start"
+              onClick={() => handleOwnershipFilterChange("user")}
+              sx={{
+                backgroundColor:
+                  filters.ownership === "user" ? "secondary.main" : undefined,
+                fontWeight: filters.ownership === "user" ? "bold" : undefined,
+                color: filters.ownership === "user" ? "white" : undefined,
+              }}
+            >
+              User
+            </Button>
+          </ButtonGroup>
+        </Box>
       </Box>
 
-      <Box display="flex" gap={1} mb={2} flexWrap="wrap" alignItems="center">
-        <FormControl sx={{ minWidth: 130 }} size="small">
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={filters.categoryType || ""}
-            label="Type"
-            onChange={handleTypeChange}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="income">Income</MenuItem>
-            <MenuItem value="expense">Expense</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
+      {/* Category Table */}
       <TableContainer>
         <Table size="small">
           <TableHead>
@@ -159,7 +258,7 @@ export default function CategoryTable() {
 
           <TableBody>
             {categoryStore.loading
-              ? Array.from({ length: pagination.pageSize }).map((_, i) => (
+              ? Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     {Array.from({ length: 4 }).map((_, j) => (
                       <TableCell key={j}>
@@ -168,42 +267,58 @@ export default function CategoryTable() {
                     ))}
                   </TableRow>
                 ))
-              : categoryStore.allCategoryList.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.displayName}</TableCell>
-                    <TableCell>{row.type}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleEditClick(row)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteClick(row.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+              : categoryStore.allCategoryList.map((row) => {
+                  const isSystemCategory = !row.user;
+                  return (
+                    <TableRow key={row.id} hover>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>{row.displayName}</TableCell>
+                      <TableCell>{row.type}</TableCell>
+                      <TableCell>
+                        <Tooltip
+                          title={
+                            isSystemCategory
+                              ? "Cannot edit system category"
+                              : "Edit"
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              disabled={isSystemCategory}
+                              onClick={() => handleEditClick(row)}
+                            >
+                              <EditOutlinedIcon />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+
+                        <Tooltip
+                          title={
+                            isSystemCategory
+                              ? "Cannot delete system category"
+                              : "Delete"
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              disabled={isSystemCategory}
+                              onClick={() => handleDeleteClick(row.id)}
+                            >
+                              <DeleteOutlineIcon />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
           </TableBody>
         </Table>
       </TableContainer>
-
-      <TablePagination
-        component="div"
-        count={totalRows}
-        page={pagination.page}
-        onPageChange={handleChangePage}
-        rowsPerPage={pagination.pageSize}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-      />
 
       {/* Dialogs */}
       <CategoryFormDialog

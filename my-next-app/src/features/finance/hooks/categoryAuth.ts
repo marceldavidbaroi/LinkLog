@@ -48,6 +48,7 @@ export const useCategory = () => {
       const { data }: ApiResponse<Category[]> = await CategoryApi.getAll(
         params
       );
+      console.log("data from the api", data);
       setCategoryList(data || []);
       setIncomeCategoryList(data?.filter((c) => c.type === "income") || []);
       setExpenseCategoryList(data?.filter((c) => c.type === "expense") || []);
@@ -122,6 +123,7 @@ export const useCategory = () => {
     setError(null);
     try {
       const { data }: ApiResponse<CategoryStats> = await CategoryApi.getStats();
+      console.log("state", data);
       setCategoryStatus(data || null);
       return data;
     } catch (err: any) {

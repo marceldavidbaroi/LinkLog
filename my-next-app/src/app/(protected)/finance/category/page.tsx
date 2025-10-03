@@ -2,9 +2,10 @@
 
 import { Box } from "@mui/material";
 import CategoryTable from "@/features/finance/components/category/CategoryTable";
+import StatusCard from "@/features/finance/components/category/StatusCard";
 import ScrollContainer from "@/components/ScrollContainer";
 
-const TransactionIndex = () => {
+const CategoryIndex = () => {
   return (
     <Box
       sx={{
@@ -26,7 +27,9 @@ const TransactionIndex = () => {
           boxSizing: "border-box",
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.12)", // subtle shadow
         }}
-      />
+      >
+        <StatusCard />
+      </Box>
 
       {/* Right big column */}
       <Box
@@ -53,4 +56,4 @@ const TransactionIndex = () => {
   );
 };
 
-export default TransactionIndex;
+export default CategoryIndex;
