@@ -15,6 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             { label: "Transactions", href: "/transaction" },
             { label: "Budget", href: "/budget" },
             { label: "Collection", href: "/collection" },
+            { label: "Category", href: "/category" },
           ]}
         />
       </Box>

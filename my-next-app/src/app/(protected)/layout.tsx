@@ -11,7 +11,7 @@ import MobileDrawer from "@/components/navigation/MobileDrawer";
 
 const navLinks = [
   { iconName: "Dashboard", text: "Dashboard", href: "/dashboard" },
-  { iconName: "Finance", text: "Finance", href: "/finance" },
+  { iconName: "Finance", text: "Finance", href: "/finance/dashboard" },
   { iconName: "Vault", text: "Vault", href: "/vault" },
   { iconName: "Profile", text: "Profile", href: "/profile" },
 ];

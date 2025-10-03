@@ -179,6 +179,7 @@ export default function TransactionTable() {
         flexWrap="wrap"
         gap={1}
       >
+        {JSON.stringify(transactionStore.transactionList)}
         <Button
           variant="contained"
           color="primary"
@@ -311,7 +312,7 @@ export default function TransactionTable() {
                   >
                     <TableCell>{formatDate(row.date)}</TableCell>
                     <TableCell>{row.type}</TableCell>
-                    <TableCell>{row.category}</TableCell>
+                    <TableCell>{row.category.displayName}</TableCell>
                     <TableCell>{row.description}</TableCell>
                     <TableCell>{row.recurring ? "Yes" : "No"}</TableCell>
                     <TableCell>{row.recurringInterval}</TableCell>

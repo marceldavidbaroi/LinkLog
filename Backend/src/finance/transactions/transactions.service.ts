@@ -68,7 +68,7 @@ export class TransactionsService {
     const query = this.transactionsRepository
       .createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.category', 'category') // ✅ join for filtering
-      .where('transaction.userId = :userId', { userId: user.id });
+      .where('transaction.user_id = :userId', { userId: user.id });
 
     if (filters?.type) {
       query.andWhere('transaction.type = :type', { type: filters.type });
