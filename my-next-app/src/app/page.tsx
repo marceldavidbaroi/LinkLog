@@ -10,10 +10,16 @@ import {
   Grid,
   useTheme,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Home() {
   const theme = useTheme();
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <Box className="min-h-screen flex flex-col">
@@ -50,6 +56,7 @@ export default function Home() {
                   fontWeight: 500,
                   textTransform: "none",
                 }}
+                onClick={handleClick}
               >
                 Get Started
               </Button>

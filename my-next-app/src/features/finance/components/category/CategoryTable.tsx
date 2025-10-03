@@ -50,18 +50,9 @@ export default function CategoryTable() {
     categoryStore.setCategoryList(response || []);
   };
 
-  const getCategoryStatus = async () => {
-    await getStats();
-    console.log("category", categoryStore.categoryStatus);
-  };
-
   useEffect(() => {
     fetchCategories();
   }, [filters]);
-
-  useEffect(() => {
-    getCategoryStatus();
-  }, []);
 
   const handleAdd = () => {
     setEditingCategory(null);

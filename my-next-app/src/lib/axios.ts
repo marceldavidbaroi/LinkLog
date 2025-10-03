@@ -1,19 +1,22 @@
+// lib/api.ts
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import useAuthStore from "@/features/auth/store/authStore";
 import useNotificationStore from "@/store/notificationStore";
 
-// Base URL from Next.js environment variable
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Axios instance
+// Create Axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, // ensures refresh token cookie is sent automatically
+  withCredentials: true, // send cookies automatically
 });
 
 // ------------------ Request Interceptor ------------------
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // Only run in browser (client-side)
+  if (typeof window === "undefined") return config;
+
   const token = useAuthStore.getState().token;
   if (token) {
     config.headers = {
@@ -21,18 +24,19 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       Authorization: `Bearer ${token}`,
     };
   }
+
   return config;
 });
 
 // ------------------ Response Interceptor ------------------
 api.interceptors.response.use(
   (response) => {
-    // If response is a blob, return as-is
+    // If response is blob, return as-is
     if (response.config.responseType === "blob") return response;
 
     const notify = useNotificationStore.getState().setNotification;
 
-    // Show success message for modifying requests
+    // Show success messages for modifying requests
     const method = response.config.method?.toLowerCase();
     if (["post", "put", "patch", "delete"].includes(method || "")) {
       notify("Operation successful!", "success");
@@ -40,7 +44,7 @@ api.interceptors.response.use(
 
     const data = response.data;
 
-    // If backend already follows ApiResponse format
+    // If backend already uses ApiResponse format
     if (
       data &&
       typeof data === "object" &&
@@ -50,7 +54,7 @@ api.interceptors.response.use(
       return data;
     }
 
-    // Wrap raw payload
+    // Otherwise wrap raw payload
     return {
       success: true,
       message: "OK",
@@ -58,7 +62,6 @@ api.interceptors.response.use(
     };
   },
 
-  // ------------------ Error Handling ------------------
   async (
     error: AxiosError & {
       config?: InternalAxiosRequestConfig & { _retry?: boolean };
@@ -68,7 +71,7 @@ api.interceptors.response.use(
     const authStore = useAuthStore.getState();
     const originalRequest = error.config;
 
-    // If response is blob containing JSON error, parse it
+    // Handle blob errors (JSON inside blob)
     if (error.response?.data instanceof Blob) {
       const blob = error.response.data;
       const text = await blob.text();
@@ -82,7 +85,7 @@ api.interceptors.response.use(
       notify((error.response?.data as any)?.message || error.message, "error");
     }
 
-    // ------------------ Token Refresh Flow ------------------
+    // ------------------ Token Refresh ------------------
     if (
       error.response?.status === 401 &&
       originalRequest &&
@@ -91,22 +94,16 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Try refreshing token
-        const refreshResponse = await axios.post(
-          `${API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-
+        // Use api instance to refresh token (ensures cookies + baseURL)
+        const refreshResponse = await api.post("/auth/refresh", {});
         const newToken = refreshResponse.data?.accessToken;
-        if (!newToken) {
-          throw new Error("No accessToken in refresh response");
-        }
 
-        // Update token in store
+        if (!newToken) throw new Error("No accessToken in refresh response");
+
+        // Update store
         authStore.setToken(newToken);
 
-        // Retry the original request with new token
+        // Retry original request with new token
         originalRequest.headers = {
           ...originalRequest.headers,
           Authorization: `Bearer ${newToken}`,
@@ -121,7 +118,7 @@ api.interceptors.response.use(
       }
     }
 
-    // Still 401 after refresh attempt → logout
+    // Still 401 after retry → logout
     if (error.response?.status === 401) {
       authStore.clearAuth();
     }

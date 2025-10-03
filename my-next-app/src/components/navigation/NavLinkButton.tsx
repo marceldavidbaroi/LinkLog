@@ -1,8 +1,11 @@
+"use client";
+
 import { IconButton } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useRouter } from "next/navigation";
 
 interface NavLinkButtonProps {
   iconName: string;
@@ -17,6 +20,8 @@ const iconMap: Record<string, JSX.Element> = {
 };
 
 export default function NavLinkButton({ iconName, href }: NavLinkButtonProps) {
+  const router = useRouter();
+
   return (
     <IconButton
       sx={{
@@ -24,7 +29,7 @@ export default function NavLinkButton({ iconName, href }: NavLinkButtonProps) {
         transition: "all 0.3s",
         "&:hover": { transform: "scale(1.2)" },
       }}
-      href={href}
+      onClick={() => router.push(href)}
     >
       {iconMap[iconName]}
     </IconButton>

@@ -1,32 +1,63 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Button, ButtonGroup, Paper, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
+import {
+  Paper,
+  ButtonGroup,
+  Button,
+  useTheme,
+  Box,
+  Skeleton,
+} from "@mui/material";
 
-type Tab = {
+interface Tab {
   label: string;
-  href: string; // relative to root
-};
+  href: string;
+}
 
 interface TabChooserProps {
   root: string;
   tabs: Tab[];
+  loading?: boolean;
+  onTabClick: (href: string) => void; // callback to parent
 }
 
-export default function TabChooser({ root, tabs }: TabChooserProps) {
+export default function TabChooser({
+  root,
+  tabs,
+  loading = false,
+  onTabClick,
+}: TabChooserProps) {
   const theme = useTheme();
   const pathname = usePathname();
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<string>("");
 
-  const isActive = (href: string) => pathname === `${root}${href}`;
+  // Set active tab based on pathname
+  useEffect(() => {
+    const matchingTab = tabs.find((tab) => pathname.includes(tab.href));
+    setActiveTab(matchingTab ? matchingTab.href : tabs[0]?.href || "");
+  }, [pathname, tabs]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", gap: 1 }}>
+        {tabs.map((_, idx) => (
+          <Skeleton key={idx} variant="rectangular" width={100} height={40} />
+        ))}
+      </Box>
+    );
+  }
+
+  const isActive = (href: string) => activeTab === href;
 
   return (
     <Paper
-      elevation={0} // keeps the same MUI shadow
+      elevation={0}
       sx={{
         borderRadius: 2,
         display: "inline-block",
-        bgcolor: theme.palette.background.default + "CC", // semi-transparent
+        bgcolor: theme.palette.background.default + "CC",
       }}
     >
       <ButtonGroup
@@ -34,9 +65,7 @@ export default function TabChooser({ root, tabs }: TabChooserProps) {
         sx={{
           borderRadius: 2,
           overflow: "hidden",
-          "& .MuiButton-root": {
-            border: "none !important", // remove button separator lines
-          },
+          "& .MuiButton-root": { border: "none !important" },
         }}
       >
         {tabs.map((tab, idx) => {
@@ -44,22 +73,23 @@ export default function TabChooser({ root, tabs }: TabChooserProps) {
           return (
             <Button
               key={idx}
-              onClick={() => router.push(`${root}${tab.href}`)}
+              onClick={() => {
+                setActiveTab(tab.href); // update local state
+                onTabClick(tab.href);
+              }}
               disableRipple
               sx={{
                 textTransform: "none",
                 px: 4,
                 py: 1.2,
-                borderRadius: 0,
                 fontWeight: 600,
                 backdropFilter: "blur(8px)",
-                // Reverse colors on active
                 backgroundColor: active
-                  ? theme.palette.primary.main // active background = primary
-                  : theme.palette.background.default, // inactive background = default
+                  ? theme.palette.primary.main
+                  : theme.palette.background.default,
                 color: active
-                  ? theme.palette.background.default // active text = background color
-                  : theme.palette.text.primary, // inactive text
+                  ? theme.palette.background.default
+                  : theme.palette.text.primary,
                 boxShadow: "none",
                 transition: "all 0.25s ease",
                 "&:hover": {
@@ -67,12 +97,8 @@ export default function TabChooser({ root, tabs }: TabChooserProps) {
                     ? theme.palette.primary.dark
                     : theme.palette.grey[100],
                 },
-                "&:first-of-type": {
-                  borderRadius: "8px 0 0 8px",
-                },
-                "&:last-of-type": {
-                  borderRadius: "0 8px 8px 0",
-                },
+                "&:first-of-type": { borderRadius: "8px 0 0 8px" },
+                "&:last-of-type": { borderRadius: "0 8px 8px 0" },
               }}
             >
               {tab.label}
