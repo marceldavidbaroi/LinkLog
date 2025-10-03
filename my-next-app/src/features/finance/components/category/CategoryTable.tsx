@@ -128,115 +128,126 @@ export default function CategoryTable() {
           Add Category
         </Button>
         <Box display="flex" gap={1} flexWrap="wrap">
-          {/* Type Filter */}
-          <ButtonGroup>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleTypeFilterChange(undefined)}
-              sx={{
-                backgroundColor:
-                  filters.categoryType === undefined
-                    ? "secondary.main"
-                    : undefined,
-                fontWeight:
-                  filters.categoryType === undefined ? "bold" : undefined,
-                color: filters.categoryType === undefined ? "white" : undefined,
-              }}
-            >
-              All Types
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleTypeFilterChange("income")}
-              sx={{
-                backgroundColor:
-                  filters.categoryType === "income"
-                    ? "secondary.main"
-                    : undefined,
-                fontWeight:
-                  filters.categoryType === "income" ? "bold" : undefined,
-                color: filters.categoryType === "income" ? "white" : undefined,
-              }}
-            >
-              Income
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleTypeFilterChange("expense")}
-              sx={{
-                backgroundColor:
-                  filters.categoryType === "expense"
-                    ? "secondary.main"
-                    : undefined,
-                fontWeight:
-                  filters.categoryType === "expense" ? "bold" : undefined,
-                color: filters.categoryType === "expense" ? "white" : undefined,
-              }}
-            >
-              Expense
-            </Button>
-          </ButtonGroup>
+          {categoryStore.loading ? (
+            // Show skeletons instead of buttons
+            <>
+              <Skeleton variant="rectangular" width={100} height={36} />
+              <Skeleton variant="rectangular" width={100} height={36} />
+              <Skeleton variant="rectangular" width={100} height={36} />
+              <Skeleton variant="rectangular" width={120} height={36} />
+              <Skeleton variant="rectangular" width={120} height={36} />
+            </>
+          ) : (
+            <>
+              {/* Type Filter */}
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleTypeFilterChange(undefined)}
+                  sx={{
+                    backgroundColor:
+                      filters.categoryType === undefined
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.categoryType === undefined ? "bold" : undefined,
+                    color:
+                      filters.categoryType === undefined ? "white" : undefined,
+                  }}
+                >
+                  All Types
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleTypeFilterChange("income")}
+                  sx={{
+                    backgroundColor:
+                      filters.categoryType === "income"
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.categoryType === "income" ? "bold" : undefined,
+                    color:
+                      filters.categoryType === "income" ? "white" : undefined,
+                  }}
+                >
+                  Income
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleTypeFilterChange("expense")}
+                  sx={{
+                    backgroundColor:
+                      filters.categoryType === "expense"
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.categoryType === "expense" ? "bold" : undefined,
+                    color:
+                      filters.categoryType === "expense" ? "white" : undefined,
+                  }}
+                >
+                  Expense
+                </Button>
+              </ButtonGroup>
 
-          {/* Ownership Filter */}
-          <ButtonGroup>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleOwnershipFilterChange(undefined)}
-              sx={{
-                backgroundColor:
-                  filters.ownership === undefined
-                    ? "secondary.main"
-                    : undefined,
-                fontWeight:
-                  filters.ownership === undefined ? "bold" : undefined,
-                color: filters.ownership === undefined ? "white" : undefined,
-              }}
-            >
-              All Ownership
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleOwnershipFilterChange("system")}
-              sx={{
-                backgroundColor:
-                  filters.ownership === "system" ? "secondary.main" : undefined,
-                fontWeight: filters.ownership === "system" ? "bold" : undefined,
-                color: filters.ownership === "system" ? "white" : undefined,
-              }}
-            >
-              System
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              loading={categoryStore.loading}
-              loadingPosition="start"
-              onClick={() => handleOwnershipFilterChange("user")}
-              sx={{
-                backgroundColor:
-                  filters.ownership === "user" ? "secondary.main" : undefined,
-                fontWeight: filters.ownership === "user" ? "bold" : undefined,
-                color: filters.ownership === "user" ? "white" : undefined,
-              }}
-            >
-              User
-            </Button>
-          </ButtonGroup>
+              {/* Ownership Filter */}
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleOwnershipFilterChange(undefined)}
+                  sx={{
+                    backgroundColor:
+                      filters.ownership === undefined
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.ownership === undefined ? "bold" : undefined,
+                    color:
+                      filters.ownership === undefined ? "white" : undefined,
+                  }}
+                >
+                  All Ownership
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleOwnershipFilterChange("system")}
+                  sx={{
+                    backgroundColor:
+                      filters.ownership === "system"
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.ownership === "system" ? "bold" : undefined,
+                    color: filters.ownership === "system" ? "white" : undefined,
+                  }}
+                >
+                  System
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleOwnershipFilterChange("user")}
+                  sx={{
+                    backgroundColor:
+                      filters.ownership === "user"
+                        ? "secondary.main"
+                        : undefined,
+                    fontWeight:
+                      filters.ownership === "user" ? "bold" : undefined,
+                    color: filters.ownership === "user" ? "white" : undefined,
+                  }}
+                >
+                  User
+                </Button>
+              </ButtonGroup>
+            </>
+          )}
         </Box>
       </Box>
 

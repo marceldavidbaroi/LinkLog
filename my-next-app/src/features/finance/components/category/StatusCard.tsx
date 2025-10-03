@@ -73,8 +73,8 @@ export default function CategoryStatsCards() {
             textAlign: "center",
             p: 1.5,
             borderRadius: 2,
-            bgcolor: "primary.main",
-            color: "white",
+            bgcolor: "background.default",
+            color: "primary.main",
             minHeight: { xs: 100, md: 0 }, // a bit taller on mobile
           }}
         >
@@ -94,7 +94,7 @@ export default function CategoryStatsCards() {
           {item.details && (
             <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
               {item.details.map((d, i) => (
-                <Typography key={i} variant="caption" sx={{ opacity: 0.9 }}>
+                <Typography key={i} variant="caption" sx={{ opacity: 1 }}>
                   {d.label}:{d.val}
                 </Typography>
               ))}

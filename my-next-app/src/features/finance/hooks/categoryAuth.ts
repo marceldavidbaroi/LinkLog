@@ -33,6 +33,7 @@ export const useCategory = () => {
       const { data }: ApiResponse<Category> = await CategoryApi.create(payload);
       setCategory(data || null);
       if (data) setCategoryList([data, ...allCategoryList]);
+      await getStats();
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -48,7 +49,6 @@ export const useCategory = () => {
       const { data }: ApiResponse<Category[]> = await CategoryApi.getAll(
         params
       );
-      console.log("data from the api", data);
       setCategoryList(data || []);
       setIncomeCategoryList(data?.filter((c) => c.type === "income") || []);
       setExpenseCategoryList(data?.filter((c) => c.type === "expense") || []);
@@ -92,6 +92,7 @@ export const useCategory = () => {
         setCategoryList(updatedList);
         setIncomeCategoryList(updatedList.filter((c) => c.type === "income"));
         setExpenseCategoryList(updatedList.filter((c) => c.type === "expense"));
+        await getStats();
       }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
@@ -110,6 +111,7 @@ export const useCategory = () => {
       setCategoryList(updatedList);
       setIncomeCategoryList(updatedList.filter((c) => c.type === "income"));
       setExpenseCategoryList(updatedList.filter((c) => c.type === "expense"));
+      await getStats();
     } catch (err: any) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -123,7 +125,6 @@ export const useCategory = () => {
     setError(null);
     try {
       const { data }: ApiResponse<CategoryStats> = await CategoryApi.getStats();
-      console.log("state", data);
       setCategoryStatus(data || null);
       return data;
     } catch (err: any) {

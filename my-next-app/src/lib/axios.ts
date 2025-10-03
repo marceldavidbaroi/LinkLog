@@ -16,7 +16,6 @@ const api = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = useAuthStore.getState().token;
   if (token) {
-    // Spread existing headers to avoid overwriting
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${token}`,
@@ -58,6 +57,8 @@ api.interceptors.response.use(
       data,
     };
   },
+
+  // ------------------ Error Handling ------------------
   async (
     error: AxiosError & {
       config?: InternalAxiosRequestConfig & { _retry?: boolean };
@@ -78,37 +79,49 @@ api.interceptors.response.use(
         notify(error.message, "error");
       }
     } else {
-      notify(error.response?.data?.message || error.message, "error");
+      notify((error.response?.data as any)?.message || error.message, "error");
     }
 
-    // Handle 401: try refreshing access token
+    // ------------------ Token Refresh Flow ------------------
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
+
       try {
+        // Try refreshing token
         const refreshResponse = await axios.post(
           `${API_URL}/auth/refresh`,
           {},
           { withCredentials: true }
         );
-        const newToken = refreshResponse.data.accessToken;
-        authStore.setToken(newToken);
 
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        const newToken = refreshResponse.data?.accessToken;
+        if (!newToken) {
+          throw new Error("No accessToken in refresh response");
         }
 
-        return api(originalRequest); // retry original request
-      } catch {
+        // Update token in store
+        authStore.setToken(newToken);
+
+        // Retry the original request with new token
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${newToken}`,
+        };
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed → logout
         authStore.clearAuth();
-        return Promise.reject(error);
+        notify("Session expired. Please log in again.", "error");
+        return Promise.reject(refreshError);
       }
     }
 
-    // If still 401 after refresh attempt
+    // Still 401 after refresh attempt → logout
     if (error.response?.status === 401) {
       authStore.clearAuth();
     }

@@ -12,14 +12,16 @@ import {
   FormControl,
   InputLabel,
   Select,
+  CircularProgress,
+  Box,
 } from "@mui/material";
-import type { Category } from "../types/category.type";
+import type { Category } from "../../types/category.type";
 
 interface CategoryFormDialogProps {
   open: boolean;
   category: Category | null;
   onClose: () => void;
-  onSubmit: (data: Partial<Category>) => void;
+  onSubmit: (data: Partial<Category>) => Promise<void> | void;
 }
 
 export default function CategoryFormDialog({
@@ -34,6 +36,7 @@ export default function CategoryFormDialog({
   const [errors, setErrors] = useState<{ name?: string; displayName?: string }>(
     {}
   );
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (category) {
@@ -46,9 +49,10 @@ export default function CategoryFormDialog({
       setType("income");
     }
     setErrors({});
-  }, [category]);
+    setLoading(false);
+  }, [category, open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: typeof errors = {};
     if (!name.trim()) newErrors.name = "Name is required";
     if (!displayName.trim()) newErrors.displayName = "Display Name is required";
@@ -58,7 +62,14 @@ export default function CategoryFormDialog({
       return;
     }
 
-    onSubmit({ name, displayName, type });
+    setLoading(true);
+    try {
+      await onSubmit({ name, displayName, type });
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,6 +84,7 @@ export default function CategoryFormDialog({
           onChange={(e) => setName(e.target.value)}
           error={!!errors.name}
           helperText={errors.name}
+          disabled={loading}
         />
         <TextField
           label="Display Name"
@@ -82,8 +94,9 @@ export default function CategoryFormDialog({
           onChange={(e) => setDisplayName(e.target.value)}
           error={!!errors.displayName}
           helperText={errors.displayName}
+          disabled={loading}
         />
-        <FormControl fullWidth margin="normal">
+        <FormControl fullWidth margin="normal" disabled={loading}>
           <InputLabel>Type</InputLabel>
           <Select
             value={type}
@@ -95,11 +108,25 @@ export default function CategoryFormDialog({
         </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} color="inherit" disabled={loading}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          {category ? "Save Changes" : "Add Category"}
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          color="primary"
+          disabled={loading}
+        >
+          {loading ? (
+            <Box display="flex" alignItems="center" gap={1}>
+              <CircularProgress size={20} color="inherit" />
+              {category ? "Saving..." : "Adding..."}
+            </Box>
+          ) : category ? (
+            "Save Changes"
+          ) : (
+            "Add Category"
+          )}
         </Button>
       </DialogActions>
     </Dialog>
